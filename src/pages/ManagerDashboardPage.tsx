@@ -19,7 +19,7 @@ import { PieChart, DollarSign, ClipboardCheck } from 'lucide-react';
 import { DashboardContent } from '@/components/DashboardContent';
 import MainNavigation from '@/components/MainNavigation';
 import { ApprovalRequestsContent } from '@/components/ApprovalRequestsContent';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const ManagerDashboardPage = () => {
   const isMobile = useIsMobile();
@@ -29,7 +29,11 @@ const ManagerDashboardPage = () => {
     <div className="flex flex-col h-screen">
       <MainNavigation />
       <div className="mb-4 px-6 pt-4">
-        <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'dashboard' | 'approvals')} className="w-full">
+        <Tabs 
+          value={activeView} 
+          onValueChange={(value) => setActiveView(value as 'dashboard' | 'approvals')} 
+          className="w-full"
+        >
           <TabsList className="grid w-[400px] grid-cols-2">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="approvals">Pending Approvals</TabsTrigger>
@@ -39,7 +43,16 @@ const ManagerDashboardPage = () => {
       <SidebarProvider defaultOpen={true}>
         <div className="flex w-full flex-1 bg-background overflow-hidden">
           <DashboardSidebar activeMetric={activeView === 'dashboard' ? 'risk' : 'approvals'} />
-          {activeView === 'dashboard' ? <DashboardContent /> : <ApprovalRequestsContent />}
+          
+          {/* Use TabsContent components here for proper rendering */}
+          <Tabs value={activeView} className="flex-1">
+            <TabsContent value="dashboard" className="flex-1 h-full m-0">
+              <DashboardContent />
+            </TabsContent>
+            <TabsContent value="approvals" className="flex-1 h-full m-0">
+              <ApprovalRequestsContent />
+            </TabsContent>
+          </Tabs>
         </div>
       </SidebarProvider>
     </div>
