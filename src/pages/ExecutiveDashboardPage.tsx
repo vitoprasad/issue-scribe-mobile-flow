@@ -30,8 +30,11 @@ import { CircleAlert, CircleCheck, TrendingDown, TrendingUp } from 'lucide-react
 import { Separator } from '@/components/ui/separator';
 import { ExecutiveDashboardHeader } from '@/components/ExecutiveDashboardHeader';
 
+// Define the possible program status values
+type ProgramStatus = "red" | "yellow" | "green";
+
 // Sample data for charts and tables
-const programStatus = "yellow"; // Can be "red", "yellow", "green"
+const programStatus: ProgramStatus = "yellow"; // Can be "red", "yellow", "green"
 
 const subsystemRiskData = [
   { name: 'Propulsion', high: 12, medium: 8, low: 5 },
