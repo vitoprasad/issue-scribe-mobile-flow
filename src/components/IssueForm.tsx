@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/components/ui/toast';
+import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Camera, Save, Send, Search, FileText, Info, DollarSign, Image, X } from 'lucide-react';
 import PartNumberSearch from '@/components/PartNumberSearch';
