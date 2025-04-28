@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { 
   Table, TableHeader, TableBody, TableRow, 
   TableHead, TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Check, Pencil, X, Filter, Calendar, Info, Clock, Users, Shield, Wrench, MessageSquare, GitPullRequest } from 'lucide-react';
+import { Pencil, X, Filter, Calendar, Info, Clock, Users, Shield, Wrench, MessageSquare, GitPullRequest } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
@@ -270,21 +269,6 @@ const IssueTriagePage = () => {
   const [isChangelogDialogOpen, setIsChangelogDialogOpen] = useState(false);
   const [currentChangeLogEntry, setCurrentChangeLogEntry] = useState<string>('');
   
-  // Initialize form hooks
-  const rejectForm = useForm<RejectFormValues>({
-    defaultValues: {
-      comment: ''
-    }
-  });
-  
-  const submissionForm = useForm<SubmissionFormValues>({
-    defaultValues: {
-      submissionType: 'Standard Repair',
-      targetTeam: '',
-      comment: ''
-    }
-  });
-  
   // Define available teams
   const predefinedTeamOptions = [
     'Manufacturing Engineering',
@@ -392,13 +376,10 @@ const IssueTriagePage = () => {
   };
 
   // Handle individual cluster action
-  const handleClusterAction = (cluster: IssueCluster, action: 'approve' | 'modify' | 'reject' | 'submit' | 'changelog') => {
+  const handleClusterAction = (cluster: IssueCluster, action: 'modify' | 'reject' | 'submit' | 'changelog') => {
     setCurrentCluster(cluster);
     
     switch (action) {
-      case 'approve':
-        handleApproveCluster(cluster.id);
-        break;
       case 'modify':
         // Open edit dialog
         setIsEditDialogOpen(true);
@@ -704,9 +685,6 @@ const IssueTriagePage = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleBulkAction('approve')}>
-                      <Check className="mr-2 h-4 w-4 text-green-500" /> Approve All
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleBulkAction('reject')}>
                       <X className="mr-2 h-4 w-4 text-red-500" /> Reject All
                     </DropdownMenuItem>
@@ -811,14 +789,6 @@ const IssueTriagePage = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              onClick={() => handleClusterAction(cluster, 'approve')}
-                              title="Approve"
-                            >
-                              <Check className="h-4 w-4 text-green-500" />
-                            </Button>
                             <Button 
                               size="sm" 
                               variant="ghost"
