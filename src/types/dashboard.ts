@@ -32,6 +32,17 @@ export interface AISuggestion {
   actionable: boolean;
 }
 
+export interface ExecutiveFeedback {
+  id: string;
+  title: string;
+  description: string;
+  priority: "critical" | "high" | "medium" | "low";
+  category: "directive" | "inquiry" | "notification";
+  createdAt: string;
+  status: "new" | "in-progress" | "completed";
+  assignee?: string;
+}
+
 export const chartConfig = {
   high: {
     label: 'High Risk',
