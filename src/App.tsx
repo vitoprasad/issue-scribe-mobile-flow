@@ -10,6 +10,7 @@ import IssueTriagePage from "./pages/IssueTriagePage";
 import ManagerDashboardPage from "./pages/ManagerDashboardPage";
 import IssueTicketsPage from "./pages/IssueTicketsPage";
 import ExecutiveDashboardPage from "./pages/ExecutiveDashboardPage";
+import SplashPage from "./pages/SplashPage";
 
 const queryClient = new QueryClient();
 
@@ -20,10 +21,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/splash" element={<SplashPage />} />
           <Route path="/" element={<Index />} />
-          <Route path="/triage" element={<IssueTriagePage />} />
-          <Route path="/manager-dashboard" element={<ManagerDashboardPage />} />
           <Route path="/issue-tickets" element={<IssueTicketsPage />} />
+          <Route path="/manager-dashboard" element={<ManagerDashboardPage />} />
+          <Route path="/triage" element={<IssueTriagePage />} />
           <Route path="/executive-dashboard" element={<ExecutiveDashboardPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -13,40 +13,25 @@ import {
   SidebarMenuButton,
   SidebarSeparator
 } from '@/components/ui/sidebar';
-import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableHead, 
-  TableRow, 
-  TableCell 
-} from '@/components/ui/table';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Check, PieChart, DollarSign, Clock, Filter, Calendar, Shield, FileText, Package, X, Pencil } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { Card } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
-import { ManagerDashboardHeader } from '@/components/ManagerDashboardHeader';
-import { RepairActionsTable } from '@/components/RepairActionsTable';
-import { ProgramRiskSummary } from '@/components/ProgramRiskSummary';
-import { DashboardFilters } from '@/components/DashboardFilters';
-import { CostRiskMetric } from '@/components/CostRiskMetric';
+import { PieChart, DollarSign } from 'lucide-react';
 import { DashboardContent } from '@/components/DashboardContent';
+import MainNavigation from '@/components/MainNavigation';
 
 const ManagerDashboardPage = () => {
   const isMobile = useIsMobile();
   
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="flex w-full min-h-screen bg-background">
-        <DashboardSidebar />
-        <DashboardContent />
-      </div>
-    </SidebarProvider>
+    <div className="flex flex-col h-screen">
+      <MainNavigation />
+      <SidebarProvider defaultOpen={true}>
+        <div className="flex w-full flex-1 bg-background overflow-hidden">
+          <DashboardSidebar />
+          <DashboardContent />
+        </div>
+      </SidebarProvider>
+    </div>
   );
 };
 
