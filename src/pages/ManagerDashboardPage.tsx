@@ -15,36 +15,49 @@ import {
 } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from "@/hooks/use-toast";
-import { PieChart, DollarSign } from 'lucide-react';
+import { PieChart, DollarSign, ClipboardCheck } from 'lucide-react';
 import { DashboardContent } from '@/components/DashboardContent';
 import MainNavigation from '@/components/MainNavigation';
+import { ApprovalRequestsContent } from '@/components/ApprovalRequestsContent';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const ManagerDashboardPage = () => {
   const isMobile = useIsMobile();
+  const [activeView, setActiveView] = useState<'dashboard' | 'approvals'>('dashboard');
   
   return (
     <div className="flex flex-col h-screen">
       <MainNavigation />
+      <div className="mb-4 px-6 pt-4">
+        <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'dashboard' | 'approvals')} className="w-full">
+          <TabsList className="grid w-[400px] grid-cols-2">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="approvals">Pending Approvals</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
       <SidebarProvider defaultOpen={true}>
         <div className="flex w-full flex-1 bg-background overflow-hidden">
-          <DashboardSidebar />
-          <DashboardContent />
+          <DashboardSidebar activeMetric={activeView === 'dashboard' ? 'risk' : 'approvals'} />
+          {activeView === 'dashboard' ? <DashboardContent /> : <ApprovalRequestsContent />}
         </div>
       </SidebarProvider>
     </div>
   );
 };
 
-const DashboardSidebar = () => {
+interface DashboardSidebarProps {
+  activeMetric: string;
+}
+
+const DashboardSidebar = ({ activeMetric }: DashboardSidebarProps) => {
   const { toast } = useToast();
-  const [activeMetric, setActiveMetric] = useState('risk');
   
   const handleMenuClick = (metric: string) => {
-    setActiveMetric(metric);
-    
     const metricNames = {
       risk: 'Program Risk Summary',
-      cost: 'Total Cost at Risk'
+      cost: 'Total Cost at Risk',
+      approvals: 'Pending Approvals'
     };
     
     toast({
@@ -87,6 +100,16 @@ const DashboardSidebar = () => {
                 >
                   <DollarSign />
                   <span>Total Cost at Risk</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  tooltip="Pending Approvals" 
+                  isActive={activeMetric === 'approvals'} 
+                  onClick={() => handleMenuClick('approvals')}
+                >
+                  <ClipboardCheck />
+                  <span>Pending Approvals</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
