@@ -23,6 +23,15 @@ export interface RiskTimeData {
   low: number;
 }
 
+export interface AISuggestion {
+  id: string;
+  title: string;
+  description: string;
+  impact: "high" | "medium" | "low";
+  category: "risk" | "process" | "resource";
+  actionable: boolean;
+}
+
 export const chartConfig = {
   high: {
     label: 'High Risk',

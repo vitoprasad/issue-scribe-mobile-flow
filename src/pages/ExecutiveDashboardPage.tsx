@@ -5,11 +5,13 @@ import { ProgramHealthStatus } from '@/components/dashboard/ProgramHealthStatus'
 import { SubsystemRiskBreakdown } from '@/components/dashboard/SubsystemRiskBreakdown';
 import { TopRiskContributors } from '@/components/dashboard/TopRiskContributors';
 import { RiskTrendOverTime } from '@/components/dashboard/RiskTrendOverTime';
+import { AIRecommendations } from '@/components/dashboard/AIRecommendations';
 import { 
   programStatus, 
   subsystemRiskData, 
   topRiskContributors, 
-  riskTimeData 
+  riskTimeData,
+  aiSuggestions
 } from '@/data/mockDashboardData';
 
 const ExecutiveDashboardPage = () => {
@@ -20,6 +22,11 @@ const ExecutiveDashboardPage = () => {
       <div className="flex-1 p-6">
         {/* Program Health Status Bar */}
         <ProgramHealthStatus status={programStatus} />
+
+        {/* AI Recommendations */}
+        <div className="mb-6">
+          <AIRecommendations suggestions={aiSuggestions} />
+        </div>
 
         {/* Middle Section - Risk Breakdown and Top Contributors */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

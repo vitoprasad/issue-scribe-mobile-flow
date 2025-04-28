@@ -1,5 +1,5 @@
 
-import { ProgramStatus, RiskItem, SubsystemRisk, RiskTimeData } from "../types/dashboard";
+import { ProgramStatus, RiskItem, SubsystemRisk, RiskTimeData, AISuggestion } from "../types/dashboard";
 
 // Sample data for charts and tables
 export const programStatus: ProgramStatus = "yellow"; // Can be "red", "yellow", "green"
@@ -27,4 +27,39 @@ export const riskTimeData: RiskTimeData[] = [
   { month: 'Apr', high: 35, medium: 30, low: 35 },
   { month: 'May', high: 25, medium: 35, low: 40 },
   { month: 'Jun', high: 30, medium: 30, low: 40 },
+];
+
+export const aiSuggestions: AISuggestion[] = [
+  {
+    id: "AI-001",
+    title: "Power System Risk Mitigation",
+    description: "Based on trending data, power system failures are increasing. Consider allocating additional engineering resources to investigate root causes.",
+    impact: "high",
+    category: "risk",
+    actionable: true
+  },
+  {
+    id: "AI-002",
+    title: "Propulsion Testing Optimization",
+    description: "Current test protocols show redundancy. Streamlining could reduce schedule impact by approximately 14 days.",
+    impact: "medium",
+    category: "process",
+    actionable: true
+  },
+  {
+    id: "AI-003",
+    title: "Cross-Functional Team Recommendation",
+    description: "Thermal and Avionics risk correlation suggests establishing a joint task force would improve issue resolution efficiency.",
+    impact: "medium",
+    category: "resource",
+    actionable: true
+  },
+  {
+    id: "AI-004",
+    title: "Supply Chain Risk Alert",
+    description: "Detected potential delays in critical components for structure subsystem based on vendor performance metrics.",
+    impact: "high",
+    category: "risk",
+    actionable: false
+  }
 ];
