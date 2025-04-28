@@ -2,6 +2,9 @@
 import React from 'react';
 import IssueForm from '@/components/IssueForm';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { BarChart3 } from 'lucide-react';
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -17,6 +20,15 @@ const Index = () => {
             </div>
           </div>
           <p className="text-sm text-gray-500 mt-1">Quality Assurance System</p>
+          
+          <div className="mt-4">
+            <Link to="/triage">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                <span>View Issue Triage Dashboard</span>
+              </Button>
+            </Link>
+          </div>
         </header>
         
         <IssueForm />
