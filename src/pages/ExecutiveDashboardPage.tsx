@@ -92,7 +92,13 @@ const ExecutiveDashboardPage = () => {
             <div className="flex items-center">
               <div className="flex-1 bg-gray-200 h-8 rounded-md overflow-hidden flex">
                 <div 
-                  className={`h-full ${programStatus === 'red' ? 'bg-red-500' : (programStatus === 'yellow' ? 'bg-yellow-400' : 'bg-green-500')}`}
+                  className={`h-full ${
+                    programStatus === 'red' 
+                      ? 'bg-red-500' 
+                      : programStatus === 'yellow' 
+                        ? 'bg-yellow-400' 
+                        : 'bg-green-500'
+                  }`}
                   style={{ width: '60%' }}
                 ></div>
               </div>
@@ -100,25 +106,25 @@ const ExecutiveDashboardPage = () => {
                 <div className="flex items-center">
                   {programStatus === 'red' ? (
                     <CircleAlert className="text-red-500 mr-2" />
-                  ) : (programStatus === 'yellow' ? (
+                  ) : programStatus === 'yellow' ? (
                     <CircleAlert className="text-yellow-400 mr-2" />
                   ) : (
                     <CircleCheck className="text-green-500 mr-2" />
-                  ))}
+                  )}
                   <span className="font-medium">
                     {programStatus === 'red' 
                       ? 'Critical Risk Level' 
-                      : (programStatus === 'yellow' 
+                      : programStatus === 'yellow' 
                         ? 'Elevated Risk Level' 
-                        : 'Acceptable Risk Level')}
+                        : 'Acceptable Risk Level'}
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
                   {programStatus === 'red' 
                     ? 'Immediate action required' 
-                    : (programStatus === 'yellow' 
+                    : programStatus === 'yellow' 
                       ? 'Monitor closely and develop mitigation plans' 
-                      : 'Continue standard monitoring')}
+                      : 'Continue standard monitoring'}
                 </p>
               </div>
             </div>
