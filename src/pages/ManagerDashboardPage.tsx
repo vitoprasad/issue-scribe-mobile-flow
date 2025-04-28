@@ -42,7 +42,10 @@ const ManagerDashboardPage = () => {
       </div>
       <SidebarProvider defaultOpen={true}>
         <div className="flex w-full flex-1 bg-background overflow-hidden">
-          <DashboardSidebar activeMetric={activeView === 'dashboard' ? 'risk' : 'approvals'} />
+          <DashboardSidebar 
+            activeMetric={activeView === 'dashboard' ? 'risk' : 'approvals'} 
+            setActiveView={setActiveView}
+          />
           
           {/* Use TabsContent components here for proper rendering */}
           <Tabs value={activeView} className="flex-1">
@@ -61,12 +64,20 @@ const ManagerDashboardPage = () => {
 
 interface DashboardSidebarProps {
   activeMetric: string;
+  setActiveView: (view: 'dashboard' | 'approvals') => void;
 }
 
-const DashboardSidebar = ({ activeMetric }: DashboardSidebarProps) => {
+const DashboardSidebar = ({ activeMetric, setActiveView }: DashboardSidebarProps) => {
   const { toast } = useToast();
   
   const handleMenuClick = (metric: string) => {
+    // Set the correct view based on menu selection
+    if (metric === 'approvals') {
+      setActiveView('approvals');
+    } else {
+      setActiveView('dashboard');
+    }
+    
     const metricNames = {
       risk: 'Program Risk Summary',
       cost: 'Total Cost at Risk',
