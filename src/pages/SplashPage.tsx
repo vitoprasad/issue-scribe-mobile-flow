@@ -24,20 +24,20 @@ const SplashPage = () => {
       buttonColor: "bg-amber-600 hover:bg-amber-700"
     },
     {
-      title: "Manager Dashboard",
-      description: "Monitor program health and quality metrics",
-      icon: <LayoutDashboard className="h-10 w-10 text-emerald-600" />,
-      path: "/manager-dashboard",
-      color: "bg-emerald-50 border-emerald-200",
-      buttonColor: "bg-emerald-600 hover:bg-emerald-700"
-    },
-    {
       title: "Issue Triage",
       description: "Prioritize and categorize incoming quality issues",
       icon: <BarChart3 className="h-10 w-10 text-purple-600" />,
       path: "/triage",
       color: "bg-purple-50 border-purple-200",
       buttonColor: "bg-purple-600 hover:bg-purple-700"
+    },
+    {
+      title: "Manager Dashboard",
+      description: "Monitor program health and quality metrics",
+      icon: <LayoutDashboard className="h-10 w-10 text-emerald-600" />,
+      path: "/manager-dashboard",
+      color: "bg-emerald-50 border-emerald-200",
+      buttonColor: "bg-emerald-600 hover:bg-emerald-700"
     },
     {
       title: "Executive Dashboard",

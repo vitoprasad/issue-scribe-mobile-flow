@@ -31,16 +31,16 @@ const MainNavigation = () => {
       description: "View and manage reported quality issues"
     },
     {
-      title: "Manager Dashboard",
-      icon: <LayoutDashboard className="h-4 w-4" />,
-      path: "/manager-dashboard",
-      description: "Monitor program health and quality metrics"
-    },
-    {
       title: "Issue Triage",
       icon: <BarChart3 className="h-4 w-4" />,
       path: "/triage",
       description: "Prioritize and categorize incoming issues"
+    },
+    {
+      title: "Manager Dashboard",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+      path: "/manager-dashboard",
+      description: "Monitor program health and quality metrics"
     },
     {
       title: "Executive Dashboard",
