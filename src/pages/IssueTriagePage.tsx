@@ -1048,32 +1048,44 @@ const IssueTriagePage = () => {
           <DialogHeader>
             <DialogTitle>Reject Cluster {currentCluster?.id}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={rejectForm.handleSubmit((values) => {
-            if (currentCluster) handleRejectCluster(currentCluster.id, values.comment);
-          })}>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <FormLabel>Reason for rejection (provides feedback to AI system)</FormLabel>
-                <Textarea 
-                  {...rejectForm.register("comment")}
-                  className="min-h-[100px]"
-                  placeholder="Please provide detailed feedback to help improve AI suggestions"
-                />
+          <Form {...rejectForm}>
+            <form onSubmit={rejectForm.handleSubmit((values) => {
+              if (currentCluster) handleRejectCluster(currentCluster.id, values.comment);
+            })}>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <FormField
+                    control={rejectForm.control}
+                    name="comment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Reason for rejection (provides feedback to AI system)</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            className="min-h-[100px]"
+                            placeholder="Please provide detailed feedback to help improve AI suggestions"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsRejectDialogOpen(false)}
-                type="button"
-              >
-                Cancel
-              </Button>
-              <Button type="submit">
-                Submit Rejection
-              </Button>
-            </div>
-          </form>
+              <div className="flex justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsRejectDialogOpen(false)}
+                  type="button"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  Submit Rejection
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
       
@@ -1083,57 +1095,83 @@ const IssueTriagePage = () => {
           <DialogHeader>
             <DialogTitle>Submit Cluster {currentCluster?.id} for Approval</DialogTitle>
           </DialogHeader>
-          <form onSubmit={submissionForm.handleSubmit((values) => {
-            if (currentCluster) handleSubmitForApproval(currentCluster.id, values);
-          })}>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <FormLabel>Submission Type</FormLabel>
-                <select
-                  {...submissionForm.register("submissionType")}
-                  className="w-full h-9 rounded border border-industrial-200 bg-white px-3 text-sm"
-                >
-                  <option value="Standard Repair">Standard Repair</option>
-                  <option value="Containment">Containment/Escalation</option>
-                </select>
-              </div>
-              <div className="grid gap-2">
-                <FormLabel>Target Team for Approval</FormLabel>
-                <select
-                  {...submissionForm.register("targetTeam")}
-                  className="w-full h-9 rounded border border-industrial-200 bg-white px-3 text-sm"
-                >
-                  <option value="">Select a team...</option>
-                  {allTeamOptions.map(team => (
-                    <option key={team} value={team}>{team}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid gap-2">
-                <FormLabel>Additional Comments</FormLabel>
-                <Textarea 
-                  {...submissionForm.register("comment")}
-                  className="min-h-[100px]"
-                  placeholder="Additional context or instructions for approval"
+          <Form {...submissionForm}>
+            <form onSubmit={submissionForm.handleSubmit((values) => {
+              if (currentCluster) handleSubmitForApproval(currentCluster.id, values);
+            })}>
+              <div className="grid gap-4 py-4">
+                <FormField
+                  control={submissionForm.control}
+                  name="submissionType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Submission Type</FormLabel>
+                      <FormControl>
+                        <select
+                          className="w-full h-9 rounded border border-industrial-200 bg-white px-3 text-sm"
+                          {...field}
+                        >
+                          <option value="Standard Repair">Standard Repair</option>
+                          <option value="Containment">Containment/Escalation</option>
+                        </select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={submissionForm.control}
+                  name="targetTeam"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Target Team for Approval</FormLabel>
+                      <FormControl>
+                        <select
+                          className="w-full h-9 rounded border border-industrial-200 bg-white px-3 text-sm"
+                          {...field}
+                        >
+                          <option value="">Select a team...</option>
+                          {allTeamOptions.map(team => (
+                            <option key={team} value={team}>{team}</option>
+                          ))}
+                        </select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={submissionForm.control}
+                  name="comment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Additional Comments</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          className="min-h-[100px]"
+                          placeholder="Additional context or instructions for approval"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsSubmitDialogOpen(false)}
-                type="button"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit"
-                disabled={!submissionForm.watch("targetTeam")}
-              >
-                Submit for Approval
-              </Button>
-            </div>
-          </form>
+              <div className="flex justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsSubmitDialogOpen(false)}
+                  type="button"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={!submissionForm.watch("targetTeam")}
+                >
+                  Submit for Approval
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
       
@@ -1167,7 +1205,7 @@ const IssueTriagePage = () => {
           
           <div className="border-t pt-4 mt-4">
             <div className="flex flex-col gap-3">
-              <FormLabel>Add a comment</FormLabel>
+              <label className="text-sm font-medium">Add a comment</label>
               <div className="flex gap-2">
                 <Textarea 
                   value={currentChangeLogEntry}
