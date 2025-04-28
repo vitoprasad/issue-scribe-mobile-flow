@@ -2,10 +2,26 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { DollarSign } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export const CostRiskMetric = () => {
+  const { toast } = useToast();
+
+  const handleClick = () => {
+    toast({
+      title: "Cost Risk Breakdown",
+      description: "Viewing detailed cost risk analysis across all affected parts and subsystems.",
+    });
+    
+    // In a real app, this would navigate to a detailed view or open a modal
+    console.log("Cost risk metric clicked");
+  };
+
   return (
-    <div className="p-3 rounded-lg border bg-slate-50 flex items-center space-x-4">
+    <div 
+      className="p-3 rounded-lg border bg-slate-50 flex items-center space-x-4 cursor-pointer hover:bg-slate-100 transition-colors"
+      onClick={handleClick}
+    >
       <div className="p-2 rounded-full bg-primary/10">
         <DollarSign className="h-5 w-5 text-primary" />
       </div>

@@ -51,6 +51,25 @@ const ManagerDashboardPage = () => {
 };
 
 const DashboardSidebar = () => {
+  const { toast } = useToast();
+  const [activeMetric, setActiveMetric] = useState('risk');
+  
+  const handleMenuClick = (metric: string) => {
+    setActiveMetric(metric);
+    
+    const metricNames = {
+      risk: 'Program Risk Summary',
+      cost: 'Total Cost at Risk'
+    };
+    
+    toast({
+      title: `Viewing ${metricNames[metric as keyof typeof metricNames]}`,
+      description: "Dashboard metrics updated",
+    });
+    
+    console.log(`Dashboard metric selected: ${metric}`);
+  };
+
   return (
     <Sidebar side="left" variant="inset" collapsible="icon">
       <SidebarHeader className="flex flex-col gap-4 px-2 py-4">
@@ -66,13 +85,21 @@ const DashboardSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Program Risk Summary">
+                <SidebarMenuButton 
+                  tooltip="Program Risk Summary" 
+                  isActive={activeMetric === 'risk'} 
+                  onClick={() => handleMenuClick('risk')}
+                >
                   <PieChart />
                   <span>Program Risk Summary</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Total Cost at Risk">
+                <SidebarMenuButton 
+                  tooltip="Total Cost at Risk" 
+                  isActive={activeMetric === 'cost'} 
+                  onClick={() => handleMenuClick('cost')}
+                >
                   <DollarSign />
                   <span>Total Cost at Risk</span>
                 </SidebarMenuButton>

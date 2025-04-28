@@ -1,17 +1,38 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Filter, Calendar } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 export const DashboardFilters = () => {
+  const [program, setProgram] = useState('all');
+  const [dateRange, setDateRange] = useState('30days');
+  const [severity, setSeverity] = useState('all');
+  
+  const handleProgramChange = (value: string) => {
+    setProgram(value);
+    // In a real app, this would trigger a data fetch or filter
+    console.log('Program filter changed:', value);
+  };
+  
+  const handleDateRangeChange = (value: string) => {
+    setDateRange(value);
+    console.log('Date range changed:', value);
+  };
+  
+  const handleSeverityChange = (value: string) => {
+    setSeverity(value);
+    console.log('Severity filter changed:', value);
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="font-medium text-sm mb-2 text-muted-foreground">Filters</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Program/Subsystem</label>
-          <Select defaultValue="all">
+          <Select value={program} onValueChange={handleProgramChange}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select Program" />
             </SelectTrigger>
@@ -26,24 +47,24 @@ export const DashboardFilters = () => {
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Date Range</label>
-          <Button variant="outline" className="w-full justify-start text-left font-normal">
-            <Calendar className="mr-2 h-4 w-4" />
-            <span>Last 30 Days</span>
-          </Button>
+          <ToggleGroup type="single" value={dateRange} onValueChange={(value) => value && handleDateRangeChange(value)}>
+            <ToggleGroupItem value="7days" className="text-xs">7d</ToggleGroupItem>
+            <ToggleGroupItem value="30days" className="text-xs">30d</ToggleGroupItem>
+            <ToggleGroupItem value="90days" className="text-xs">90d</ToggleGroupItem>
+            <ToggleGroupItem value="custom" className="text-xs flex items-center">
+              <Calendar className="h-3.5 w-3.5 mr-1" />
+              Custom
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Severity</label>
-          <Select defaultValue="all">
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Severity" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Severity Levels</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-            </SelectContent>
-          </Select>
+          <ToggleGroup type="single" value={severity} onValueChange={(value) => value && handleSeverityChange(value)}>
+            <ToggleGroupItem value="all" className="text-xs">All</ToggleGroupItem>
+            <ToggleGroupItem value="high" className="text-xs text-destructive">High</ToggleGroupItem>
+            <ToggleGroupItem value="medium" className="text-xs text-amber-500">Med</ToggleGroupItem>
+            <ToggleGroupItem value="low" className="text-xs text-green-600">Low</ToggleGroupItem>
+          </ToggleGroup>
         </div>
       </div>
     </div>
