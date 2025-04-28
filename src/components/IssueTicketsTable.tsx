@@ -56,20 +56,16 @@ export const IssueTicketsTable = ({
     }
   };
   
-  // Filter the data based on applied filters
   const filteredTickets = useMemo(() => {
     return mockIssueTickets.filter(ticket => {
-      // Category filter
       if (filters.categories.length > 0 && !filters.categories.includes(ticket.category)) {
         return false;
       }
       
-      // Severity filter
       if (filters.severityLevels.length > 0 && !filters.severityLevels.includes(ticket.severity)) {
         return false;
       }
       
-      // Cost range filter
       if (filters.minCost !== null && ticket.costImpact < filters.minCost) {
         return false;
       }
@@ -77,7 +73,6 @@ export const IssueTicketsTable = ({
         return false;
       }
       
-      // Date range filter
       const ticketDate = new Date(ticket.timeReported);
       if (filters.startDate && new Date(filters.startDate) > ticketDate) {
         return false;
@@ -90,7 +85,6 @@ export const IssueTicketsTable = ({
     });
   }, [filters]);
   
-  // Sort the filtered data
   const sortedTickets = useMemo(() => {
     return [...filteredTickets].sort((a, b) => {
       if (sortField === 'timeReported') {
@@ -212,7 +206,6 @@ export const IssueTicketsTable = ({
   );
 };
 
-// Mock data for demonstration
 const mockIssueTickets: IssueTicket[] = [
   {
     id: 'T1001',
@@ -319,3 +312,28 @@ const mockIssueTickets: IssueTicket[] = [
     status: 'In Progress'
   }
 ];
+
+function handleSort(field: SortField) {
+  if (sortField === field) {
+    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+  } else {
+    setSortField(field);
+    setSortDirection('asc');
+  }
+}
+
+function getSortIcon(field: SortField) {
+  if (sortField !== field) return null;
+  return sortDirection === 'asc' ? 
+    <ArrowUp className="inline h-4 w-4 ml-1" /> : 
+    <ArrowDown className="inline h-4 w-4 ml-1" />;
+}
+
+function getSeverityColor(severity: string) {
+  switch (severity) {
+    case 'High': return 'bg-destructive text-destructive-foreground hover:bg-destructive/80';
+    case 'Medium': return 'bg-amber-500 text-white hover:bg-amber-600';
+    case 'Low': return 'bg-green-600 text-white hover:bg-green-700';
+    default: return 'bg-slate-500 text-white hover:bg-slate-600';
+  }
+}
