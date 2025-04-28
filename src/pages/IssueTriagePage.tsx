@@ -269,6 +269,21 @@ const IssueTriagePage = () => {
   const [isChangelogDialogOpen, setIsChangelogDialogOpen] = useState(false);
   const [currentChangeLogEntry, setCurrentChangeLogEntry] = useState<string>('');
   
+  // Initialize form hooks
+  const rejectForm = useForm<RejectFormValues>({
+    defaultValues: {
+      comment: ''
+    }
+  });
+  
+  const submissionForm = useForm<SubmissionFormValues>({
+    defaultValues: {
+      submissionType: 'Standard Repair',
+      targetTeam: '',
+      comment: ''
+    }
+  });
+  
   // Define available teams
   const predefinedTeamOptions = [
     'Manufacturing Engineering',
@@ -354,7 +369,7 @@ const IssueTriagePage = () => {
   };
 
   // Handle bulk actions
-  const handleBulkAction = (action: 'approve' | 'modify' | 'reject') => {
+  const handleBulkAction = (action: 'modify' | 'reject') => {
     if (selectedClusters.length === 0) {
       toast({
         title: "No clusters selected",
@@ -1100,7 +1115,7 @@ const IssueTriagePage = () => {
                           {...field}
                         >
                           <option value="">Select a team...</option>
-                          {allTeamOptions.map(team => (
+                          {predefinedTeamOptions.map(team => (
                             <option key={team} value={team}>{team}</option>
                           ))}
                         </select>
