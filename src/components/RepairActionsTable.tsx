@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -10,14 +9,15 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Check, X, Pencil, FileText, Package, Shield, DollarSign, Clock } from 'lucide-react';
+import { Check, X, Pencil, FileText, Package, Shield, DollarSign, Clock, Cpu } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
-// Mock data for the table
+// Updated mock data to include affected systems
 const mockData = [
   {
     id: 'CL-2025-001',
     parts: ['A320-FN23', 'B451-TH89'],
+    systems: ['Propulsion', 'Navigation'],
     riskLevel: 'High',
     costSavings: 25000,
     timeSavings: 48,
@@ -26,6 +26,7 @@ const mockData = [
   {
     id: 'CL-2025-002',
     parts: ['C789-GH12', 'D234-JK56'],
+    systems: ['Avionics', 'Communications'],
     riskLevel: 'Medium',
     costSavings: 12000,
     timeSavings: 24,
@@ -34,6 +35,7 @@ const mockData = [
   {
     id: 'CL-2025-003',
     parts: ['E567-LM90', 'F890-OP34'],
+    systems: ['Hydraulic', 'Landing Gear'],
     riskLevel: 'Low',
     costSavings: 5000,
     timeSavings: 8,
@@ -42,6 +44,7 @@ const mockData = [
   {
     id: 'CL-2025-004',
     parts: ['G123-QR78', 'H456-ST12'],
+    systems: ['Cooling', 'Power'],
     riskLevel: 'High',
     costSavings: 32000,
     timeSavings: 72,
@@ -50,6 +53,7 @@ const mockData = [
   {
     id: 'CL-2025-005',
     parts: ['I789-UV56', 'J012-WX90'],
+    systems: ['Electrical', 'Avionics'],
     riskLevel: 'Medium',
     costSavings: 18000,
     timeSavings: 36,
@@ -58,6 +62,7 @@ const mockData = [
   {
     id: 'CL-2025-006',
     parts: ['K345-YZ78', 'L678-AB12'],
+    systems: ['Power Distribution', 'Thermal'],
     riskLevel: 'Low',
     costSavings: 7500,
     timeSavings: 16,
@@ -70,8 +75,6 @@ export const RepairActionsTable = () => {
   const [tableData, setTableData] = useState(mockData);
 
   const handleAction = (id: string, action: 'approve' | 'modify' | 'reject') => {
-    // In a real app, you would make an API call here
-    // For now, just show a toast notification
     const actionMessages = {
       approve: 'Repair action approved',
       modify: 'Repair action marked for modification',
@@ -83,7 +86,6 @@ export const RepairActionsTable = () => {
       description: `Cluster ID: ${id}`,
     });
     
-    // Remove the item from the table
     setTableData(tableData.filter(item => item.id !== id));
   };
 
@@ -115,6 +117,12 @@ export const RepairActionsTable = () => {
               <div className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 <span>Affected Parts</span>
+              </div>
+            </TableHead>
+            <TableHead className="w-[180px]">
+              <div className="flex items-center gap-2">
+                <Cpu className="h-4 w-4" />
+                <span>Affected Systems</span>
               </div>
             </TableHead>
             <TableHead className="w-[110px]">
@@ -150,6 +158,19 @@ export const RepairActionsTable = () => {
                   {item.parts.map((part, index) => (
                     <Badge key={index} variant="outline" className="justify-start max-w-fit">
                       {part}
+                    </Badge>
+                  ))}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex flex-col gap-1">
+                  {item.systems.map((system, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="outline" 
+                      className="justify-start max-w-fit bg-blue-50 text-blue-700 border-blue-200"
+                    >
+                      {system}
                     </Badge>
                   ))}
                 </div>

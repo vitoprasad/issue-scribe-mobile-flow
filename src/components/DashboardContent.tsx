@@ -3,12 +3,13 @@ import React from 'react';
 import { ManagerDashboardHeader } from './ManagerDashboardHeader';
 import { RepairActionsTable } from './RepairActionsTable';
 import { DashboardFilters } from './DashboardFilters';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgramRiskSummary } from './ProgramRiskSummary';
 import { CostRiskMetric } from './CostRiskMetric';
 import { SidebarInset } from '@/components/ui/sidebar';
 import { ExecutiveFeedbackPanel } from './ExecutiveFeedbackPanel';
 import { executiveFeedback } from '@/data/mockFeedbackData';
+import { ArrowDown } from 'lucide-react';
 
 export const DashboardContent = () => {
   return (
@@ -32,6 +33,20 @@ export const DashboardContent = () => {
           </div>
         </Card>
       </div>
+      
+      <Card className="mb-6">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ArrowDown className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-lg font-medium">AI-Suggested Repair Actions</CardTitle>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Prioritized based on executive directives
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
       
       <div className="rounded-lg border">
         <RepairActionsTable />
