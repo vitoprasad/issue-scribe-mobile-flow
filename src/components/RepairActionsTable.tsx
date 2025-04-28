@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -9,8 +10,9 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Check, X, Pencil, FileText, Package, Shield, DollarSign, Clock, Cpu } from 'lucide-react';
+import { Check, X, Pencil, FileText, Package, Shield, DollarSign, Clock, Cpu, Tag } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { executiveFeedback } from '@/data/mockFeedbackData';
 
 // Updated mock data to include affected systems
 const mockData = [
@@ -73,6 +75,28 @@ const mockData = [
 export const RepairActionsTable = () => {
   const { toast } = useToast();
   const [tableData, setTableData] = useState(mockData);
+
+  // Extract system tags from executive feedback
+  const getExecutiveSystemTags = () => {
+    const systemTags: string[] = [];
+    executiveFeedback.forEach(feedback => {
+      if (feedback.tags) {
+        feedback.tags.forEach(tag => {
+          if (!systemTags.includes(tag)) {
+            systemTags.push(tag);
+          }
+        });
+      }
+    });
+    return systemTags;
+  };
+
+  const executiveSystemTags = getExecutiveSystemTags();
+
+  // Check if a system is tagged in executive feedback
+  const isSystemTagged = (system: string) => {
+    return executiveSystemTags.includes(system);
+  };
 
   const handleAction = (id: string, action: 'approve' | 'modify' | 'reject') => {
     const actionMessages = {
@@ -151,7 +175,7 @@ export const RepairActionsTable = () => {
         </TableHeader>
         <TableBody>
           {tableData.map((item) => (
-            <TableRow key={item.id}>
+            <TableRow key={item.id} className={item.systems.some(isSystemTagged) ? "bg-blue-50" : ""}>
               <TableCell className="font-medium">{item.id}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
@@ -168,8 +192,13 @@ export const RepairActionsTable = () => {
                     <Badge 
                       key={index} 
                       variant="outline" 
-                      className="justify-start max-w-fit bg-blue-50 text-blue-700 border-blue-200"
+                      className={`justify-start max-w-fit flex items-center gap-1 ${
+                        isSystemTagged(system) 
+                          ? "bg-blue-100 text-blue-800 border-blue-300" 
+                          : "bg-blue-50 text-blue-700 border-blue-200"
+                      }`}
                     >
+                      {isSystemTagged(system) && <Tag className="h-3 w-3" />}
                       {system}
                     </Badge>
                   ))}

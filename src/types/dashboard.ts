@@ -41,6 +41,7 @@ export interface ExecutiveFeedback {
   createdAt: string;
   status: "new" | "in-progress" | "completed";
   assignee?: string;
+  tags?: string[];
 }
 
 export const chartConfig = {

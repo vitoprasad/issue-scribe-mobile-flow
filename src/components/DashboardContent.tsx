@@ -16,13 +16,13 @@ export const DashboardContent = () => {
     <SidebarInset className="p-6 overflow-auto">
       <ManagerDashboardHeader />
       
-      {/* Executive Feedback Panel */}
+      {/* Executive Feedback Panel - now minimizable */}
       <div className="mb-6">
         <ExecutiveFeedbackPanel feedback={executiveFeedback} />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <Card className="p-4 col-span-2">
+        <Card className="p-4 lg:col-span-2">
           <DashboardFilters />
         </Card>
         <Card className="p-4">
@@ -42,7 +42,10 @@ export const DashboardContent = () => {
               <CardTitle className="text-lg font-medium">AI-Suggested Repair Actions</CardTitle>
             </div>
             <div className="text-sm text-muted-foreground">
-              Prioritized based on executive directives
+              <span className="inline-flex items-center gap-1">
+                <span className="h-3 w-3 bg-blue-50 rounded-sm inline-block"></span>
+                <span>Highlighted rows have executive directive tags</span>
+              </span>
             </div>
           </div>
         </CardHeader>

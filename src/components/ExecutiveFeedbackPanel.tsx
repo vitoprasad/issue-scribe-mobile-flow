@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowDown, MessageSquare, ArrowUp, CheckCircle } from 'lucide-react';
+import { ArrowDown, MessageSquare, ArrowUp, CheckCircle, Minimize, ChevronDown, ChevronUp, Tag } from 'lucide-react';
 import { ExecutiveFeedback } from '@/types/dashboard';
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +15,7 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
   const { toast } = useToast();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeFeedback, setActiveFeedback] = useState<ExecutiveFeedback[]>(feedback);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -30,6 +31,10 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
       title: "Status Updated",
       description: `Feedback #${id} marked as ${newStatus}`,
     });
+  };
+
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
   };
 
   const getPriorityBadge = (priority: string) => {
@@ -92,81 +97,100 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
             <ArrowDown className="h-5 w-5 text-blue-600" />
             <CardTitle className="text-lg font-medium">Executive Directives</CardTitle>
           </div>
-          <Badge variant="outline" className="bg-blue-50 text-blue-600">
-            {feedback.length} Items
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="bg-blue-50 text-blue-600">
+              {feedback.length} Items
+            </Badge>
+            <Button
+              variant="ghost" 
+              size="sm"
+              onClick={toggleMinimize}
+              className="p-1 h-8 w-8"
+            >
+              {isMinimized ? <ChevronDown className="h-4 w-4" /> : <Minimize className="h-4 w-4" />}
+              <span className="sr-only">{isMinimized ? 'Expand' : 'Minimize'}</span>
+            </Button>
+          </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {activeFeedback.map((item) => (
-            <div 
-              key={item.id}
-              className="border rounded-lg overflow-hidden hover:shadow-sm transition-shadow"
-            >
-              <div className="p-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-slate-500" />
-                    <h3 
-                      className="font-medium cursor-pointer hover:text-blue-600 transition-colors"
-                      onClick={() => toggleExpand(item.id)}
-                    >
-                      {item.title}
-                    </h3>
+      {!isMinimized && (
+        <CardContent>
+          <div className="space-y-4">
+            {activeFeedback.map((item) => (
+              <div 
+                key={item.id}
+                className="border rounded-lg overflow-hidden hover:shadow-sm transition-shadow"
+              >
+                <div className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-slate-500" />
+                      <h3 
+                        className="font-medium cursor-pointer hover:text-blue-600 transition-colors"
+                        onClick={() => toggleExpand(item.id)}
+                      >
+                        {item.title}
+                      </h3>
+                    </div>
+                    {getPriorityBadge(item.priority)}
                   </div>
-                  {getPriorityBadge(item.priority)}
-                </div>
-                
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {getCategoryBadge(item.category)}
-                  {getStatusIcon(item.status)}
-                  <span className="text-xs text-slate-500">{formatDate(item.createdAt)}</span>
-                  {item.assignee && (
-                    <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
-                      Assignee: {item.assignee}
-                    </span>
+                  
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {getCategoryBadge(item.category)}
+                    {getStatusIcon(item.status)}
+                    <span className="text-xs text-slate-500">{formatDate(item.createdAt)}</span>
+                    {item.assignee && (
+                      <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
+                        Assignee: {item.assignee}
+                      </span>
+                    )}
+                    {item.tags && item.tags.map((tag, idx) => (
+                      <div key={idx} className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs">
+                        <Tag className="h-3 w-3" />
+                        {tag}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {expandedId === item.id && (
+                    <div className="mt-3 pt-3 border-t animate-in fade-in duration-200">
+                      <p className="text-sm text-slate-600 mb-4">{item.description}</p>
+                      <div className="flex justify-end gap-2">
+                        {item.status !== "completed" && (
+                          <>
+                            {item.status === "new" && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="text-blue-600"
+                                onClick={() => handleStatusUpdate(item.id, "in-progress")}
+                              >
+                                <ArrowUp className="h-4 w-4 mr-1" />
+                                Start Working
+                              </Button>
+                            )}
+                            {item.status === "in-progress" && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="text-green-600"
+                                onClick={() => handleStatusUpdate(item.id, "completed")}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Mark Complete
+                              </Button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
-                
-                {expandedId === item.id && (
-                  <div className="mt-3 pt-3 border-t animate-in fade-in duration-200">
-                    <p className="text-sm text-slate-600 mb-4">{item.description}</p>
-                    <div className="flex justify-end gap-2">
-                      {item.status !== "completed" && (
-                        <>
-                          {item.status === "new" && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="text-blue-600"
-                              onClick={() => handleStatusUpdate(item.id, "in-progress")}
-                            >
-                              <ArrowUp className="h-4 w-4 mr-1" />
-                              Start Working
-                            </Button>
-                          )}
-                          {item.status === "in-progress" && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="text-green-600"
-                              onClick={() => handleStatusUpdate(item.id, "completed")}
-                            >
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Mark Complete
-                            </Button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
+            ))}
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 };
