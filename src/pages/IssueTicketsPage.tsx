@@ -1,50 +1,60 @@
 
 import React, { useState } from 'react';
+import { 
+  Sidebar, 
+  SidebarProvider,
+  SidebarContent,
+  SidebarHeader,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent
+} from '@/components/ui/sidebar';
 import { IssueTicketsHeader } from '@/components/IssueTicketsHeader';
-import { IssueTicketsFilters } from '@/components/IssueTicketsFilters';
 import { IssueTicketsTable } from '@/components/IssueTicketsTable';
 import { IssueDetailPane } from '@/components/IssueDetailPane';
-import MainNavigation from '@/components/MainNavigation';
-
-// Define interfaces that components are looking for
-export interface IssueTicket {
-  id: string;
-  partNumber: string;
-  category: string;
-  severity: string;
-  costImpact: number;
-  timeReported: string;
-  description: string;
-  location: string;
-  reportedBy: string;
-  assignedTo?: string;
-  status: string;
-}
+import { IssueTicketsFilters } from '@/components/IssueTicketsFilters';
+import { useToast } from "@/hooks/use-toast";
 
 export interface FilterState {
   categories: string[];
-  severityLevels: string[];
   minCost: number | null;
   maxCost: number | null;
+  severityLevels: string[];
   startDate: string | null;
   endDate: string | null;
 }
 
 const IssueTicketsPage = () => {
-  const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<IssueTicket | null>(null);
+  const [showDetailPane, setShowDetailPane] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
-    severityLevels: [],
     minCost: null,
     maxCost: null,
+    severityLevels: [],
     startDate: null,
     endDate: null
   });
-
+  const { toast } = useToast();
+  
   const handleTicketClick = (ticket: IssueTicket) => {
-    setSelectedIssueId(ticket.id);
     setSelectedTicket(ticket);
+    setShowDetailPane(true);
+  };
+  
+  const handleCloseDetailPane = () => {
+    setShowDetailPane(false);
+  };
+  
+  const handleTicketAction = (action: string, ticketId: string) => {
+    toast({
+      title: `Ticket ${action}`,
+      description: `Ticket #${ticketId} has been ${action.toLowerCase()}`,
+    });
+    
+    if (action === "Closed" || action === "Flagged") {
+      setShowDetailPane(false);
+    }
   };
 
   const handleFilterChange = (newFilters: FilterState) => {
@@ -54,52 +64,92 @@ const IssueTicketsPage = () => {
   const handleClearFilters = () => {
     setFilters({
       categories: [],
-      severityLevels: [],
       minCost: null,
       maxCost: null,
+      severityLevels: [],
       startDate: null,
       endDate: null
     });
   };
-
-  const handleActionOnTicket = (action: string, ticketId: string) => {
-    console.log(`Action ${action} performed on ticket ${ticketId}`);
-    // In a real application, this would update the ticket status via an API call
-  };
-
+  
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <MainNavigation />
-      <IssueTicketsHeader />
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <IssueTicketsFilters 
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onClearFilters={handleClearFilters}
-          />
-          <div className="flex-1 overflow-hidden p-4">
-            <IssueTicketsTable 
-              onTicketClick={handleTicketClick}
-              filters={filters}
-            />
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex w-full min-h-screen bg-background">
+        <IssueTicketsSidebar 
+          filters={filters} 
+          onFilterChange={handleFilterChange} 
+          onClearFilters={handleClearFilters} 
+        />
+        <div className="flex-1 flex flex-col">
+          <IssueTicketsHeader />
+          <div className="flex flex-1">
+            <div className={`flex-1 p-6 ${showDetailPane ? 'lg:pr-0' : ''}`}>
+              <IssueTicketsTable 
+                onTicketClick={handleTicketClick} 
+                filters={filters} 
+              />
+            </div>
+            {showDetailPane && selectedTicket && (
+              <div className="w-96 border-l bg-slate-50 overflow-auto">
+                <IssueDetailPane 
+                  ticket={selectedTicket} 
+                  onClose={handleCloseDetailPane} 
+                  onAction={handleTicketAction}
+                />
+              </div>
+            )}
           </div>
         </div>
-        {selectedTicket && (
-          <div className="w-1/3 border-l border-gray-200 bg-white overflow-auto">
-            <IssueDetailPane 
-              ticket={selectedTicket} 
-              onClose={() => {
-                setSelectedIssueId(null);
-                setSelectedTicket(null);
-              }} 
-              onAction={handleActionOnTicket}
-            />
-          </div>
-        )}
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
+
+const IssueTicketsSidebar = ({ 
+  filters, 
+  onFilterChange, 
+  onClearFilters 
+}: { 
+  filters: FilterState, 
+  onFilterChange: (filters: FilterState) => void,
+  onClearFilters: () => void
+}) => {
+  return (
+    <Sidebar side="left" variant="inset" collapsible="icon">
+      <SidebarHeader className="flex flex-col gap-4 px-2 py-4">
+        <div className="flex items-center justify-center h-12">
+          <h2 className="text-xl font-bold text-sidebar-foreground">Issue Scribe</h2>
+        </div>
+      </SidebarHeader>
+      
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Filters</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <IssueTicketsFilters 
+              filters={filters} 
+              onFilterChange={onFilterChange}
+              onClearFilters={onClearFilters}
+            />
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
+};
+
+export interface IssueTicket {
+  id: string;
+  partNumber: string;
+  category: string;
+  severity: 'Low' | 'Medium' | 'High';
+  costImpact: number;
+  timeReported: string;
+  description: string;
+  location: string;
+  reportedBy: string;
+  assignedTo: string;
+  status: 'Open' | 'In Progress' | 'Pending Review' | 'Closed';
+}
 
 export default IssueTicketsPage;
