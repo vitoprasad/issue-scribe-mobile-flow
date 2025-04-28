@@ -16,6 +16,11 @@ import { cn } from "@/lib/utils";
 
 const MainNavigation = () => {
   const location = useLocation();
+  
+  // Don't render navigation on splash page
+  if (location.pathname === '/splash') {
+    return null;
+  }
 
   const menuItems = [
     {
