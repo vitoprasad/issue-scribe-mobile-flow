@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, DollarSign, Tag, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,17 @@ import {
   FormLabel
 } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import { FilterState } from '@/pages/IssueTicketsPage';
 
-export const IssueTicketsFilters = () => {
+export const IssueTicketsFilters = ({ 
+  filters, 
+  onFilterChange,
+  onClearFilters
+}: {
+  filters: FilterState,
+  onFilterChange: (filters: FilterState) => void,
+  onClearFilters: () => void
+}) => {
   const [expanded, setExpanded] = useState({
     categories: false,
     cost: false,
@@ -22,17 +31,71 @@ export const IssueTicketsFilters = () => {
 
   const form = useForm({
     defaultValues: {
-      minCost: "",
-      maxCost: "",
-      startDate: "",
-      endDate: ""
+      minCost: filters.minCost?.toString() || "",
+      maxCost: filters.maxCost?.toString() || "",
+      startDate: filters.startDate || "",
+      endDate: filters.endDate || ""
     }
   });
+
+  // Reset form when filters are cleared externally
+  useEffect(() => {
+    form.reset({
+      minCost: filters.minCost?.toString() || "",
+      maxCost: filters.maxCost?.toString() || "",
+      startDate: filters.startDate || "",
+      endDate: filters.endDate || ""
+    });
+  }, [filters, form]);
   
   const toggleSection = (section: keyof typeof expanded) => {
     setExpanded({
       ...expanded,
       [section]: !expanded[section]
+    });
+  };
+
+  const handleCategoryChange = (category: string, checked: boolean) => {
+    const newCategories = checked 
+      ? [...filters.categories, category]
+      : filters.categories.filter(c => c !== category);
+    
+    onFilterChange({
+      ...filters,
+      categories: newCategories
+    });
+  };
+
+  const handleSeverityChange = (severity: string, checked: boolean) => {
+    const newSeverities = checked 
+      ? [...filters.severityLevels, severity]
+      : filters.severityLevels.filter(s => s !== severity);
+    
+    onFilterChange({
+      ...filters,
+      severityLevels: newSeverities
+    });
+  };
+
+  const handleCostRangeApply = () => {
+    const minCost = form.getValues("minCost") ? Number(form.getValues("minCost")) : null;
+    const maxCost = form.getValues("maxCost") ? Number(form.getValues("maxCost")) : null;
+    
+    onFilterChange({
+      ...filters,
+      minCost,
+      maxCost
+    });
+  };
+
+  const handleDateRangeApply = () => {
+    const startDate = form.getValues("startDate") || null;
+    const endDate = form.getValues("endDate") || null;
+    
+    onFilterChange({
+      ...filters,
+      startDate,
+      endDate
     });
   };
 
@@ -52,11 +115,36 @@ export const IssueTicketsFilters = () => {
         </Button>
         {expanded.categories && (
           <div className="mt-2 space-y-1 pl-8 pr-2">
-            <CategoryCheckbox label="Bearing Wear" count={3} />
-            <CategoryCheckbox label="Cooling System" count={2} />
-            <CategoryCheckbox label="Electrical" count={1} />
-            <CategoryCheckbox label="Sealing" count={1} />
-            <CategoryCheckbox label="Material Quality" count={1} />
+            <CategoryCheckbox 
+              label="Bearing Wear" 
+              count={3} 
+              checked={filters.categories.includes("Bearing Wear")}
+              onChange={(checked) => handleCategoryChange("Bearing Wear", checked)}
+            />
+            <CategoryCheckbox 
+              label="Cooling System" 
+              count={2} 
+              checked={filters.categories.includes("Cooling System")}
+              onChange={(checked) => handleCategoryChange("Cooling System", checked)}
+            />
+            <CategoryCheckbox 
+              label="Electrical" 
+              count={1} 
+              checked={filters.categories.includes("Electrical")}
+              onChange={(checked) => handleCategoryChange("Electrical", checked)}
+            />
+            <CategoryCheckbox 
+              label="Sealing" 
+              count={1} 
+              checked={filters.categories.includes("Sealing")}
+              onChange={(checked) => handleCategoryChange("Sealing", checked)}
+            />
+            <CategoryCheckbox 
+              label="Material Quality" 
+              count={1} 
+              checked={filters.categories.includes("Material Quality")}
+              onChange={(checked) => handleCategoryChange("Material Quality", checked)}
+            />
           </div>
         )}
       </div>
@@ -108,7 +196,13 @@ export const IssueTicketsFilters = () => {
                   </FormItem>
                 )}
               />
-              <Button size="sm" className="w-full text-xs">Apply Range</Button>
+              <Button 
+                size="sm" 
+                className="w-full text-xs"
+                onClick={handleCostRangeApply}
+              >
+                Apply Range
+              </Button>
             </div>
           </Form>
         )}
@@ -130,9 +224,27 @@ export const IssueTicketsFilters = () => {
         </Button>
         {expanded.severity && (
           <div className="mt-2 space-y-1 pl-8 pr-2">
-            <SeverityCheckbox label="High" color="text-destructive" count={3} />
-            <SeverityCheckbox label="Medium" color="text-amber-500" count={3} />
-            <SeverityCheckbox label="Low" color="text-green-600" count={2} />
+            <SeverityCheckbox 
+              label="High" 
+              color="text-destructive" 
+              count={3} 
+              checked={filters.severityLevels.includes("High")}
+              onChange={(checked) => handleSeverityChange("High", checked)}
+            />
+            <SeverityCheckbox 
+              label="Medium" 
+              color="text-amber-500" 
+              count={3}
+              checked={filters.severityLevels.includes("Medium")}
+              onChange={(checked) => handleSeverityChange("Medium", checked)}
+            />
+            <SeverityCheckbox 
+              label="Low" 
+              color="text-green-600" 
+              count={2}
+              checked={filters.severityLevels.includes("Low")}
+              onChange={(checked) => handleSeverityChange("Low", checked)}
+            />
           </div>
         )}
       </div>
@@ -182,7 +294,13 @@ export const IssueTicketsFilters = () => {
                   </FormItem>
                 )}
               />
-              <Button size="sm" className="w-full text-xs">Apply Dates</Button>
+              <Button 
+                size="sm" 
+                className="w-full text-xs"
+                onClick={handleDateRangeApply}
+              >
+                Apply Dates
+              </Button>
             </div>
           </Form>
         )}
@@ -190,20 +308,37 @@ export const IssueTicketsFilters = () => {
 
       <Separator />
       
-      <Button variant="outline" size="sm" className="w-full">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="w-full"
+        onClick={onClearFilters}
+      >
         Clear All Filters
       </Button>
     </div>
   );
 };
 
-const CategoryCheckbox = ({ label, count }: { label: string, count: number }) => {
+const CategoryCheckbox = ({ 
+  label, 
+  count, 
+  checked, 
+  onChange 
+}: { 
+  label: string, 
+  count: number,
+  checked: boolean,
+  onChange: (checked: boolean) => void
+}) => {
   return (
     <div className="flex items-center">
       <input 
         type="checkbox" 
         id={`category-${label}`}
         className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
       />
       <label 
         htmlFor={`category-${label}`}
@@ -216,13 +351,27 @@ const CategoryCheckbox = ({ label, count }: { label: string, count: number }) =>
   );
 };
 
-const SeverityCheckbox = ({ label, color, count }: { label: string, color: string, count: number }) => {
+const SeverityCheckbox = ({ 
+  label, 
+  color, 
+  count,
+  checked,
+  onChange 
+}: { 
+  label: string, 
+  color: string, 
+  count: number,
+  checked: boolean,
+  onChange: (checked: boolean) => void
+}) => {
   return (
     <div className="flex items-center">
       <input 
         type="checkbox" 
         id={`severity-${label}`}
         className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
       />
       <label 
         htmlFor={`severity-${label}`}

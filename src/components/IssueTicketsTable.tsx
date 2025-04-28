@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Table, 
   TableHeader, 
@@ -16,16 +15,18 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { IssueTicket } from '@/pages/IssueTicketsPage';
+import { IssueTicket, FilterState } from '@/pages/IssueTicketsPage';
 import { ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 type SortField = 'timeReported' | 'costImpact' | 'severity';
 type SortDirection = 'asc' | 'desc';
 
 export const IssueTicketsTable = ({ 
-  onTicketClick 
+  onTicketClick,
+  filters
 }: { 
-  onTicketClick: (ticket: IssueTicket) => void 
+  onTicketClick: (ticket: IssueTicket) => void,
+  filters: FilterState
 }) => {
   const [sortField, setSortField] = useState<SortField>('timeReported');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -55,32 +56,80 @@ export const IssueTicketsTable = ({
     }
   };
   
-  // Sort the data
-  const sortedTickets = [...mockIssueTickets].sort((a, b) => {
-    if (sortField === 'timeReported') {
-      const dateA = new Date(a.timeReported).getTime();
-      const dateB = new Date(b.timeReported).getTime();
-      return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
-    }
-    
-    if (sortField === 'costImpact') {
-      return sortDirection === 'asc' ? a.costImpact - b.costImpact : b.costImpact - a.costImpact;
-    }
-    
-    if (sortField === 'severity') {
-      const severityMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
-      const valA = severityMap[a.severity as keyof typeof severityMap];
-      const valB = severityMap[b.severity as keyof typeof severityMap];
-      return sortDirection === 'asc' ? valA - valB : valB - valA;
-    }
-    
-    return 0;
-  });
+  // Filter the data based on applied filters
+  const filteredTickets = useMemo(() => {
+    return mockIssueTickets.filter(ticket => {
+      // Category filter
+      if (filters.categories.length > 0 && !filters.categories.includes(ticket.category)) {
+        return false;
+      }
+      
+      // Severity filter
+      if (filters.severityLevels.length > 0 && !filters.severityLevels.includes(ticket.severity)) {
+        return false;
+      }
+      
+      // Cost range filter
+      if (filters.minCost !== null && ticket.costImpact < filters.minCost) {
+        return false;
+      }
+      if (filters.maxCost !== null && ticket.costImpact > filters.maxCost) {
+        return false;
+      }
+      
+      // Date range filter
+      const ticketDate = new Date(ticket.timeReported);
+      if (filters.startDate && new Date(filters.startDate) > ticketDate) {
+        return false;
+      }
+      if (filters.endDate && new Date(filters.endDate) < ticketDate) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [filters]);
+  
+  // Sort the filtered data
+  const sortedTickets = useMemo(() => {
+    return [...filteredTickets].sort((a, b) => {
+      if (sortField === 'timeReported') {
+        const dateA = new Date(a.timeReported).getTime();
+        const dateB = new Date(b.timeReported).getTime();
+        return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+      }
+      
+      if (sortField === 'costImpact') {
+        return sortDirection === 'asc' ? a.costImpact - b.costImpact : b.costImpact - a.costImpact;
+      }
+      
+      if (sortField === 'severity') {
+        const severityMap = { 'Low': 1, 'Medium': 2, 'High': 3 };
+        const valA = severityMap[a.severity as keyof typeof severityMap];
+        const valB = severityMap[b.severity as keyof typeof severityMap];
+        return sortDirection === 'asc' ? valA - valB : valB - valA;
+      }
+      
+      return 0;
+    });
+  }, [filteredTickets, sortField, sortDirection]);
 
   return (
     <div className="rounded-md border bg-white shadow-sm">
       <div className="p-4 flex justify-between items-center">
-        <h2 className="text-lg font-medium">Open Tickets ({mockIssueTickets.length})</h2>
+        <h2 className="text-lg font-medium">
+          Open Tickets ({sortedTickets.length})
+          {filters.categories.length > 0 || 
+           filters.severityLevels.length > 0 || 
+           filters.minCost !== null || 
+           filters.maxCost !== null ||
+           filters.startDate || 
+           filters.endDate ? (
+            <span className="ml-2 text-sm text-gray-500">
+              (Filtered)
+            </span>
+          ) : null}
+        </h2>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
@@ -89,7 +138,7 @@ export const IssueTicketsTable = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => handleSort('timeReported')}>
-              Time Needs (oldest first)
+              Time Reported (oldest first)
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleSort('costImpact')}>
               Cost Impact (highest first)
@@ -100,59 +149,65 @@ export const IssueTicketsTable = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-slate-50">
-            <TableHead>Ticket ID</TableHead>
-            <TableHead>Part Number</TableHead>
-            <TableHead>Issue Category</TableHead>
-            <TableHead>
-              <button 
-                className="flex items-center font-medium"
-                onClick={() => handleSort('severity')}
-              >
-                Severity {getSortIcon('severity')}
-              </button>
-            </TableHead>
-            <TableHead>
-              <button 
-                className="flex items-center font-medium"
-                onClick={() => handleSort('costImpact')}
-              >
-                Cost Impact {getSortIcon('costImpact')}
-              </button>
-            </TableHead>
-            <TableHead>
-              <button 
-                className="flex items-center font-medium"
-                onClick={() => handleSort('timeReported')}
-              >
-                Time Reported {getSortIcon('timeReported')}
-              </button>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedTickets.map(ticket => (
-            <TableRow 
-              key={ticket.id}
-              className="cursor-pointer hover:bg-slate-100"
-              onClick={() => onTicketClick(ticket)}
-            >
-              <TableCell className="font-medium">#{ticket.id}</TableCell>
-              <TableCell>{ticket.partNumber}</TableCell>
-              <TableCell>{ticket.category}</TableCell>
-              <TableCell>
-                <Badge className={getSeverityColor(ticket.severity)}>
-                  {ticket.severity}
-                </Badge>
-              </TableCell>
-              <TableCell>${ticket.costImpact.toLocaleString()}</TableCell>
-              <TableCell>{new Date(ticket.timeReported).toLocaleDateString()}</TableCell>
+      {sortedTickets.length > 0 ? (
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-slate-50">
+              <TableHead>Ticket ID</TableHead>
+              <TableHead>Part Number</TableHead>
+              <TableHead>Issue Category</TableHead>
+              <TableHead>
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => handleSort('severity')}
+                >
+                  Severity {getSortIcon('severity')}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => handleSort('costImpact')}
+                >
+                  Cost Impact {getSortIcon('costImpact')}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => handleSort('timeReported')}
+                >
+                  Time Reported {getSortIcon('timeReported')}
+                </button>
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {sortedTickets.map(ticket => (
+              <TableRow 
+                key={ticket.id}
+                className="cursor-pointer hover:bg-slate-100"
+                onClick={() => onTicketClick(ticket)}
+              >
+                <TableCell className="font-medium">#{ticket.id}</TableCell>
+                <TableCell>{ticket.partNumber}</TableCell>
+                <TableCell>{ticket.category}</TableCell>
+                <TableCell>
+                  <Badge className={getSeverityColor(ticket.severity)}>
+                    {ticket.severity}
+                  </Badge>
+                </TableCell>
+                <TableCell>${ticket.costImpact.toLocaleString()}</TableCell>
+                <TableCell>{new Date(ticket.timeReported).toLocaleDateString()}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <div className="p-12 text-center text-gray-500">
+          No tickets match the current filter criteria
+        </div>
+      )}
     </div>
   );
 };

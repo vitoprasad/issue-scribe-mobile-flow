@@ -15,9 +15,26 @@ import { IssueDetailPane } from '@/components/IssueDetailPane';
 import { IssueTicketsFilters } from '@/components/IssueTicketsFilters';
 import { useToast } from "@/hooks/use-toast";
 
+export interface FilterState {
+  categories: string[];
+  minCost: number | null;
+  maxCost: number | null;
+  severityLevels: string[];
+  startDate: string | null;
+  endDate: string | null;
+}
+
 const IssueTicketsPage = () => {
   const [selectedTicket, setSelectedTicket] = useState<IssueTicket | null>(null);
   const [showDetailPane, setShowDetailPane] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    categories: [],
+    minCost: null,
+    maxCost: null,
+    severityLevels: [],
+    startDate: null,
+    endDate: null
+  });
   const { toast } = useToast();
   
   const handleTicketClick = (ticket: IssueTicket) => {
@@ -39,16 +56,38 @@ const IssueTicketsPage = () => {
       setShowDetailPane(false);
     }
   };
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      categories: [],
+      minCost: null,
+      maxCost: null,
+      severityLevels: [],
+      startDate: null,
+      endDate: null
+    });
+  };
   
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex w-full min-h-screen bg-background">
-        <IssueTicketsSidebar />
+        <IssueTicketsSidebar 
+          filters={filters} 
+          onFilterChange={handleFilterChange} 
+          onClearFilters={handleClearFilters} 
+        />
         <div className="flex-1 flex flex-col">
           <IssueTicketsHeader />
           <div className="flex flex-1">
             <div className={`flex-1 p-6 ${showDetailPane ? 'lg:pr-0' : ''}`}>
-              <IssueTicketsTable onTicketClick={handleTicketClick} />
+              <IssueTicketsTable 
+                onTicketClick={handleTicketClick} 
+                filters={filters} 
+              />
             </div>
             {showDetailPane && selectedTicket && (
               <div className="w-96 border-l bg-slate-50 overflow-auto">
@@ -66,7 +105,15 @@ const IssueTicketsPage = () => {
   );
 };
 
-const IssueTicketsSidebar = () => {
+const IssueTicketsSidebar = ({ 
+  filters, 
+  onFilterChange, 
+  onClearFilters 
+}: { 
+  filters: FilterState, 
+  onFilterChange: (filters: FilterState) => void,
+  onClearFilters: () => void
+}) => {
   return (
     <Sidebar side="left" variant="inset" collapsible="icon">
       <SidebarHeader className="flex flex-col gap-4 px-2 py-4">
@@ -79,7 +126,11 @@ const IssueTicketsSidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>Filters</SidebarGroupLabel>
           <SidebarGroupContent>
-            <IssueTicketsFilters />
+            <IssueTicketsFilters 
+              filters={filters} 
+              onFilterChange={onFilterChange}
+              onClearFilters={onClearFilters}
+            />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
