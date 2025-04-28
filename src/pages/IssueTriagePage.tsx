@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Table, TableHeader, TableBody, TableRow, 
@@ -268,7 +269,24 @@ const IssueTriagePage = () => {
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
   const [isChangelogDialogOpen, setIsChangelogDialogOpen] = useState(false);
   const [currentChangeLogEntry, setCurrentChangeLogEntry] = useState<string>('');
-  const [teamOptions] = useState([
+  
+  // Initialize form hooks
+  const rejectForm = useForm<RejectFormValues>({
+    defaultValues: {
+      comment: ''
+    }
+  });
+  
+  const submissionForm = useForm<SubmissionFormValues>({
+    defaultValues: {
+      submissionType: 'Standard Repair',
+      targetTeam: '',
+      comment: ''
+    }
+  });
+  
+  // Define available teams
+  const predefinedTeamOptions = [
     'Manufacturing Engineering',
     'Quality Engineering', 
     'Process Engineering',
@@ -276,7 +294,7 @@ const IssueTriagePage = () => {
     'Supply Chain',
     'Tooling Department',
     'Production Control'
-  ]);
+  ];
 
   // Calculate summary metrics
   const openClusters = clusters.length;
@@ -293,10 +311,16 @@ const IssueTriagePage = () => {
     ...containments.map(containment => containment.program)
   ])];
   const severityOptions = ['High', 'Medium', 'Low'];
-  const teamOptions = [...new Set([
+  
+  // Generate dynamic team options from the data
+  const dynamicTeamOptions = [...new Set([
     ...standardRepairs.map(repair => repair.approvedBy),
     ...containments.map(containment => containment.team)
   ])];
+  
+  // Combine predefined and dynamic team options
+  const allTeamOptions = [...new Set([...predefinedTeamOptions, ...dynamicTeamOptions])];
+  
   const statusOptions = ['Active', 'Expiring Soon', 'Expired', 'Pending Review', 'Completed'];
 
   // Handle filter changes
@@ -572,7 +596,7 @@ const IssueTriagePage = () => {
                     onChange={(e) => handleFilterChange('team', e.target.value)}
                   >
                     <option value="">All Teams</option>
-                    {teamOptions.map(team => (
+                    {allTeamOptions.map(team => (
                       <option key={team} value={team}>{team}</option>
                     ))}
                   </select>
@@ -1080,7 +1104,7 @@ const IssueTriagePage = () => {
                   className="w-full h-9 rounded border border-industrial-200 bg-white px-3 text-sm"
                 >
                   <option value="">Select a team...</option>
-                  {teamOptions.map(team => (
+                  {allTeamOptions.map(team => (
                     <option key={team} value={team}>{team}</option>
                   ))}
                 </select>
