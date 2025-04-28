@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,12 +5,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
-import { Camera, Save, Send, Search, FileText, Info, DollarSign, Image, X } from 'lucide-react';
+import { Camera, Save, Send, Search, FileText, Info, DollarSign, Image, X, Users } from 'lucide-react';
 import PartNumberSearch from '@/components/PartNumberSearch';
 import PhotoUpload from '@/components/PhotoUpload';
 
 interface IssueFormData {
   partNumber: string;
+  jobFunction: string;
   issueClassification: string;
   severity: string;
   manufacturingStage: string;
@@ -21,6 +21,7 @@ interface IssueFormData {
 
 const initialFormData: IssueFormData = {
   partNumber: '',
+  jobFunction: '',
   issueClassification: '',
   severity: '',
   manufacturingStage: '',
@@ -38,7 +39,7 @@ const IssueForm: React.FC = () => {
     setSubmitting(true);
     
     // Validate all required fields
-    if (!formData.partNumber || !formData.issueClassification || 
+    if (!formData.partNumber || !formData.jobFunction || !formData.issueClassification || 
         !formData.severity || !formData.manufacturingStage || 
         formData.costImpact === null) {
       toast({
@@ -106,6 +107,32 @@ const IssueForm: React.FC = () => {
             onSelect={handlePartNumberSelect} 
             value={formData.partNumber} 
           />
+        </div>
+        
+        <div className="form-section">
+          <Label htmlFor="jobFunction" className="input-label flex items-center gap-2">
+            <Users className="h-4 w-4" /> Job Function *
+          </Label>
+          <Select 
+            value={formData.jobFunction}
+            onValueChange={(value) => handleChange('jobFunction', value)}
+          >
+            <SelectTrigger className="select-field">
+              <SelectValue placeholder="Select job function" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="qa_technician">Quality Assurance Technician</SelectItem>
+              <SelectItem value="assembly_operator">Assembly Line Operator</SelectItem>
+              <SelectItem value="production_supervisor">Production Supervisor</SelectItem>
+              <SelectItem value="maintenance_technician">Maintenance Technician</SelectItem>
+              <SelectItem value="process_engineer">Process Engineer</SelectItem>
+              <SelectItem value="materials_handler">Materials Handler</SelectItem>
+              <SelectItem value="inspection_specialist">Inspection Specialist</SelectItem>
+              <SelectItem value="cnc_operator">CNC Operator</SelectItem>
+              <SelectItem value="warehouse_associate">Warehouse Associate</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="form-section">
