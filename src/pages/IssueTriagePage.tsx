@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { 
   Table, TableHeader, TableBody, TableRow, 
   TableHead, TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Check, Pencil, X, Filter, Calendar, Info, Clock, Users } from 'lucide-react';
+import { Check, Pencil, X, Filter, Calendar, Info, Clock, Users, Shield, Wrench, MessageSquare, GitPullRequest } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
@@ -13,6 +12,9 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
 
 // Define the type for issue clusters
 interface IssueCluster {
@@ -23,6 +25,19 @@ interface IssueCluster {
   program: string;
   severity: 'High' | 'Medium' | 'Low';
   date: string;
+  rejectionReason?: string;
+  changelog?: ChangeLogEntry[];
+  status?: 'Pending' | 'Approved' | 'Rejected';
+  submissionType?: 'Standard Repair' | 'Containment' | null;
+}
+
+// Define type for change log entries
+interface ChangeLogEntry {
+  id: string;
+  timestamp: string;
+  user: string;
+  action: string;
+  comment: string;
 }
 
 // Define type for standard repairs
@@ -61,7 +76,9 @@ const mockClusters: IssueCluster[] = [
     confidence: 87,
     program: 'Alpha',
     severity: 'High',
-    date: '2025-04-25'
+    date: '2025-04-25',
+    status: 'Pending',
+    changelog: []
   },
   {
     id: 'CL-002',
@@ -70,7 +87,9 @@ const mockClusters: IssueCluster[] = [
     confidence: 92,
     program: 'Beta',
     severity: 'Medium',
-    date: '2025-04-26'
+    date: '2025-04-26',
+    status: 'Pending',
+    changelog: []
   },
   {
     id: 'CL-003',
@@ -79,7 +98,9 @@ const mockClusters: IssueCluster[] = [
     confidence: 75,
     program: 'Charlie',
     severity: 'Low',
-    date: '2025-04-27'
+    date: '2025-04-27',
+    status: 'Pending',
+    changelog: []
   },
   {
     id: 'CL-004',
@@ -88,7 +109,9 @@ const mockClusters: IssueCluster[] = [
     confidence: 95,
     program: 'Delta',
     severity: 'High',
-    date: '2025-04-28'
+    date: '2025-04-28',
+    status: 'Pending',
+    changelog: []
   },
   {
     id: 'CL-005',
@@ -97,7 +120,9 @@ const mockClusters: IssueCluster[] = [
     confidence: 83,
     program: 'Alpha',
     severity: 'Medium',
-    date: '2025-04-28'
+    date: '2025-04-28',
+    status: 'Pending',
+    changelog: []
   }
 ];
 
@@ -211,6 +236,17 @@ interface Filters {
   status: string;
 }
 
+// Define interfaces for forms
+interface RejectFormValues {
+  comment: string;
+}
+
+interface SubmissionFormValues {
+  submissionType: 'Standard Repair' | 'Containment';
+  targetTeam: string;
+  comment: string;
+}
+
 const IssueTriagePage = () => {
   const { toast } = useToast();
   const [clusters, setClusters] = useState<IssueCluster[]>(mockClusters);
@@ -228,6 +264,19 @@ const IssueTriagePage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentCluster, setCurrentCluster] = useState<IssueCluster | null>(null);
   const [activeTab, setActiveTab] = useState("clusters");
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+  const [isChangelogDialogOpen, setIsChangelogDialogOpen] = useState(false);
+  const [currentChangeLogEntry, setCurrentChangeLogEntry] = useState<string>('');
+  const [teamOptions] = useState([
+    'Manufacturing Engineering',
+    'Quality Engineering', 
+    'Process Engineering',
+    'Operations',
+    'Supply Chain',
+    'Tooling Department',
+    'Production Control'
+  ]);
 
   // Calculate summary metrics
   const openClusters = clusters.length;
@@ -319,19 +368,151 @@ const IssueTriagePage = () => {
   };
 
   // Handle individual cluster action
-  const handleClusterAction = (cluster: IssueCluster, action: 'approve' | 'modify' | 'reject') => {
-    if (action === 'modify') {
-      // Open edit dialog
-      setCurrentCluster(cluster);
-      setIsEditDialogOpen(true);
-      return;
+  const handleClusterAction = (cluster: IssueCluster, action: 'approve' | 'modify' | 'reject' | 'submit' | 'changelog') => {
+    setCurrentCluster(cluster);
+    
+    switch (action) {
+      case 'approve':
+        handleApproveCluster(cluster.id);
+        break;
+      case 'modify':
+        // Open edit dialog
+        setIsEditDialogOpen(true);
+        break;
+      case 'reject':
+        // Open reject dialog
+        setIsRejectDialogOpen(true);
+        break;
+      case 'submit':
+        // Open submit for approval dialog
+        setIsSubmitDialogOpen(true);
+        break;
+      case 'changelog':
+        // Open changelog dialog
+        handleViewChangelog(cluster);
+        break;
     }
+  };
 
-    // In a real application, this would send the action to an API
+  // New function to handle cluster rejection
+  const handleRejectCluster = (clusterId: string, reason: string) => {
+    setClusters(prev => prev.map(cluster => {
+      if (cluster.id === clusterId) {
+        const newChangelogEntry: ChangeLogEntry = {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          user: 'Current User',
+          action: 'Rejected',
+          comment: reason
+        };
+        
+        return {
+          ...cluster,
+          status: 'Rejected',
+          rejectionReason: reason,
+          changelog: [...(cluster.changelog || []), newChangelogEntry]
+        };
+      }
+      return cluster;
+    }));
+    
     toast({
-      title: "Action performed",
-      description: `Cluster ${cluster.id} has been ${action}ed.`,
-      variant: "default"
+      title: "Cluster Rejected",
+      description: `Feedback recorded for AI improvement.`,
+    });
+    
+    setIsRejectDialogOpen(false);
+  };
+  
+  // New function to handle submission for approval
+  const handleSubmitForApproval = (clusterId: string, values: SubmissionFormValues) => {
+    setClusters(prev => prev.map(cluster => {
+      if (cluster.id === clusterId) {
+        const newChangelogEntry: ChangeLogEntry = {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          user: 'Current User',
+          action: `Submitted for ${values.submissionType} approval to ${values.targetTeam}`,
+          comment: values.comment
+        };
+        
+        return {
+          ...cluster,
+          submissionType: values.submissionType,
+          changelog: [...(cluster.changelog || []), newChangelogEntry]
+        };
+      }
+      return cluster;
+    }));
+    
+    toast({
+      title: "Submitted for Approval",
+      description: `Cluster ${clusterId} sent to ${values.targetTeam} for ${values.submissionType} approval.`,
+    });
+    
+    setIsSubmitDialogOpen(false);
+  };
+  
+  // New function to approve a cluster
+  const handleApproveCluster = (clusterId: string) => {
+    setClusters(prev => prev.map(cluster => {
+      if (cluster.id === clusterId) {
+        const newChangelogEntry: ChangeLogEntry = {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          user: 'Current User',
+          action: 'Approved',
+          comment: 'Approved cluster and AI suggestion.'
+        };
+        
+        return {
+          ...cluster,
+          status: 'Approved',
+          changelog: [...(cluster.changelog || []), newChangelogEntry]
+        };
+      }
+      return cluster;
+    }));
+    
+    toast({
+      title: "Cluster Approved",
+      description: `Cluster ${clusterId} has been approved.`,
+    });
+  };
+  
+  // New function to view cluster changelog
+  const handleViewChangelog = (cluster: IssueCluster) => {
+    setCurrentCluster(cluster);
+    setIsChangelogDialogOpen(true);
+  };
+  
+  // New function to add a comment to the changelog
+  const handleAddChangelog = () => {
+    if (!currentCluster || !currentChangeLogEntry.trim()) return;
+    
+    setClusters(prev => prev.map(cluster => {
+      if (cluster.id === currentCluster.id) {
+        const newChangelogEntry: ChangeLogEntry = {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          user: 'Current User',
+          action: 'Comment',
+          comment: currentChangeLogEntry
+        };
+        
+        return {
+          ...cluster,
+          changelog: [...(cluster.changelog || []), newChangelogEntry]
+        };
+      }
+      return cluster;
+    }));
+    
+    setCurrentChangeLogEntry('');
+    
+    toast({
+      title: "Comment Added",
+      description: `Comment added to cluster ${currentCluster.id} changelog.`,
     });
   };
 
@@ -533,21 +714,25 @@ const IssueTriagePage = () => {
                     </TableHead>
                     <TableHead>Cluster ID</TableHead>
                     <TableHead>Affected Parts</TableHead>
-                    <TableHead className="w-1/3">Likely Fix (AI Suggestion)</TableHead>
-                    <TableHead className="text-center">Confidence %</TableHead>
+                    <TableHead className="w-1/4">Likely Fix (AI Suggestion)</TableHead>
+                    <TableHead className="text-center">AI Confidence</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredClusters.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-industrial-500">
+                      <TableCell colSpan={7} className="text-center py-8 text-industrial-500">
                         No clusters match the current filters
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredClusters.map((cluster) => (
-                      <TableRow key={cluster.id} className="border-b border-industrial-100">
+                      <TableRow key={cluster.id} className={`border-b border-industrial-100 ${
+                        cluster.status === 'Approved' ? 'bg-green-50' :
+                        cluster.status === 'Rejected' ? 'bg-red-50' : ''
+                      }`}>
                         <TableCell>
                           <input 
                             type="checkbox" 
@@ -569,7 +754,14 @@ const IssueTriagePage = () => {
                             ))}
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm">{cluster.likelyFix}</TableCell>
+                        <TableCell className="text-sm relative">
+                          {cluster.likelyFix}
+                          <div className="absolute -top-1 -left-1">
+                            <span className="bg-blue-100 text-blue-700 text-[9px] px-1 rounded-sm flex items-center">
+                              <span className="mr-1">AI</span>
+                            </span>
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <div className="flex justify-center items-center">
                             <div 
@@ -583,12 +775,23 @@ const IssueTriagePage = () => {
                             </div>
                           </div>
                         </TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                            cluster.status === 'Approved' ? 'bg-green-100 text-green-700' : 
+                            cluster.status === 'Rejected' ? 'bg-red-100 text-red-700' : 
+                            'bg-blue-100 text-blue-700'
+                          }`}>
+                            {cluster.status || 'Pending'}
+                            {cluster.submissionType && ` - ${cluster.submissionType}`}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-1">
                             <Button 
                               size="sm" 
                               variant="ghost"
                               onClick={() => handleClusterAction(cluster, 'approve')}
+                              title="Approve"
                             >
                               <Check className="h-4 w-4 text-green-500" />
                             </Button>
@@ -596,6 +799,7 @@ const IssueTriagePage = () => {
                               size="sm" 
                               variant="ghost"
                               onClick={() => handleClusterAction(cluster, 'modify')}
+                              title="Modify"
                             >
                               <Pencil className="h-4 w-4 text-blue-500" />
                             </Button>
@@ -603,8 +807,28 @@ const IssueTriagePage = () => {
                               size="sm" 
                               variant="ghost"
                               onClick={() => handleClusterAction(cluster, 'reject')}
+                              title="Reject"
                             >
                               <X className="h-4 w-4 text-red-500" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleClusterAction(cluster, 'submit')}
+                              title="Submit for approval"
+                            >
+                              {cluster.submissionType === 'Standard Repair' ? 
+                                <Wrench className="h-4 w-4 text-amber-500" /> : 
+                                <Shield className="h-4 w-4 text-purple-500" />
+                              }
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleClusterAction(cluster, 'changelog')}
+                              title="View change log"
+                            >
+                              <GitPullRequest className="h-4 w-4 text-industrial-500" />
                             </Button>
                           </div>
                         </TableCell>
@@ -790,6 +1014,154 @@ const IssueTriagePage = () => {
             }}>
               Save Changes
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Dialog */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Reject Cluster {currentCluster?.id}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={rejectForm.handleSubmit((values) => {
+            if (currentCluster) handleRejectCluster(currentCluster.id, values.comment);
+          })}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <FormLabel>Reason for rejection (provides feedback to AI system)</FormLabel>
+                <Textarea 
+                  {...rejectForm.register("comment")}
+                  className="min-h-[100px]"
+                  placeholder="Please provide detailed feedback to help improve AI suggestions"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsRejectDialogOpen(false)}
+                type="button"
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                Submit Rejection
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Submit for Approval Dialog */}
+      <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Submit Cluster {currentCluster?.id} for Approval</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submissionForm.handleSubmit((values) => {
+            if (currentCluster) handleSubmitForApproval(currentCluster.id, values);
+          })}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <FormLabel>Submission Type</FormLabel>
+                <select
+                  {...submissionForm.register("submissionType")}
+                  className="w-full h-9 rounded border border-industrial-200 bg-white px-3 text-sm"
+                >
+                  <option value="Standard Repair">Standard Repair</option>
+                  <option value="Containment">Containment/Escalation</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <FormLabel>Target Team for Approval</FormLabel>
+                <select
+                  {...submissionForm.register("targetTeam")}
+                  className="w-full h-9 rounded border border-industrial-200 bg-white px-3 text-sm"
+                >
+                  <option value="">Select a team...</option>
+                  {teamOptions.map(team => (
+                    <option key={team} value={team}>{team}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <FormLabel>Additional Comments</FormLabel>
+                <Textarea 
+                  {...submissionForm.register("comment")}
+                  className="min-h-[100px]"
+                  placeholder="Additional context or instructions for approval"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsSubmitDialogOpen(false)}
+                type="button"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                disabled={!submissionForm.watch("targetTeam")}
+              >
+                Submit for Approval
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Changelog Dialog */}
+      <Dialog open={isChangelogDialogOpen} onOpenChange={setIsChangelogDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Change Log for Cluster {currentCluster?.id}</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[400px] overflow-y-auto">
+            <div className="space-y-4">
+              {currentCluster?.changelog && currentCluster.changelog.length > 0 ? (
+                currentCluster.changelog.map((entry) => (
+                  <div key={entry.id} className="bg-gray-50 p-3 rounded-md">
+                    <div className="flex justify-between text-sm text-gray-500">
+                      <span>
+                        <span className="font-medium">{entry.user}</span> · {entry.action}
+                      </span>
+                      <span>{new Date(entry.timestamp).toLocaleString()}</span>
+                    </div>
+                    <div className="mt-1 text-gray-700">{entry.comment}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-gray-500">
+                  No change log entries yet
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="border-t pt-4 mt-4">
+            <div className="flex flex-col gap-3">
+              <FormLabel>Add a comment</FormLabel>
+              <div className="flex gap-2">
+                <Textarea 
+                  value={currentChangeLogEntry}
+                  onChange={(e) => setCurrentChangeLogEntry(e.target.value)}
+                  placeholder="Enter a comment to add to the change log"
+                  className="min-h-[80px]"
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleAddChangelog}
+                  disabled={!currentChangeLogEntry.trim()}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Add Comment
+                </Button>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
