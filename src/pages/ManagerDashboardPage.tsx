@@ -11,7 +11,8 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarSeparator
+  SidebarSeparator,
+  SidebarFooter
 } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from "@/hooks/use-toast";
@@ -145,8 +146,8 @@ const DashboardSidebar = ({
         <SidebarSeparator />
       </SidebarHeader>
       
-      <SidebarContent>
-        {/* Dashboard Navigation Group - MOVED TO TOP */}
+      <SidebarContent className="pb-4">
+        {/* Dashboard Navigation Group */}
         <SidebarGroup>
           <SidebarGroupLabel>Dashboard Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -185,7 +186,10 @@ const DashboardSidebar = ({
           </SidebarGroupContent>
         </SidebarGroup>
         
-        {/* Dashboard Filters Group - NOW POSITIONED AFTER NAVIGATION */}
+        {/* Visual separator between Navigation and Filters */}
+        <SidebarSeparator className="my-3" />
+        
+        {/* Dashboard Filters Group */}
         <SidebarGroup>
           <SidebarGroupLabel>
             <div className="flex items-center">
@@ -211,16 +215,19 @@ const DashboardSidebar = ({
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
-        
-        {/* Summary Metrics Group */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Summary Metrics</SidebarGroupLabel>
-          <SidebarGroupContent className="space-y-2 px-2">
+      </SidebarContent>
+      
+      {/* Summary Metrics moved to Footer */}
+      <SidebarFooter className="mt-auto pt-3">
+        <SidebarSeparator className="mb-3" />
+        <div className="px-4 pb-4">
+          <SidebarGroupLabel className="mb-2">Summary Metrics</SidebarGroupLabel>
+          <div className="space-y-3 px-2">
             <CostRiskMetric sidebarVariant={true} />
             <ProgramRiskSummary sidebarVariant={true} />
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+          </div>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 };
