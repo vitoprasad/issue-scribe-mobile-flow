@@ -1,3 +1,4 @@
+
 import { ProgramStatus, RiskItem, SubsystemRisk, RiskTimeData, AISuggestion } from "../types/dashboard";
 
 // Sample data for charts and tables
@@ -28,7 +29,7 @@ export const riskTimeData: RiskTimeData[] = [
   { month: 'Jun', high: 30, medium: 30, low: 40 },
 ];
 
-export const aiSuggestions = [
+export const aiSuggestions: AISuggestion[] = [
   {
     id: "ai-rec-001",
     title: "Replace faulty wiring harnesses in propulsion control units",
@@ -38,6 +39,8 @@ export const aiSuggestions = [
     actionable: true,
     estimatedSavings: 156000,
     relatedIssues: ["CL-2025-001", "CL-2025-004"],
+    implementationStatus: "pending",
+    alignedWithDirectives: true
   },
   {
     id: "ai-rec-002",
@@ -48,6 +51,7 @@ export const aiSuggestions = [
     actionable: true,
     estimatedSavings: 82500,
     relatedIssues: ["CL-2025-002", "CL-2025-005"],
+    implementationStatus: "pending"
   },
   {
     id: "ai-rec-003",
@@ -57,6 +61,8 @@ export const aiSuggestions = [
     impact: "high",
     actionable: false,
     relatedIssues: ["CL-2025-004"],
+    alignedWithDirectives: true,
+    implementationStatus: "pending"
   },
   {
     id: "ai-rec-004",
@@ -67,5 +73,6 @@ export const aiSuggestions = [
     actionable: true,
     estimatedSavings: 45000,
     relatedIssues: ["CL-2025-003", "CL-2025-006"],
+    implementationStatus: "in-progress"
   }
 ];

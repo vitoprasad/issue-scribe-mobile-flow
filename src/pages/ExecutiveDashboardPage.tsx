@@ -6,6 +6,7 @@ import { SubsystemRiskBreakdown } from '@/components/dashboard/SubsystemRiskBrea
 import { TopRiskContributors } from '@/components/dashboard/TopRiskContributors';
 import { RiskTrendOverTime } from '@/components/dashboard/RiskTrendOverTime';
 import { AIRecommendations } from '@/components/dashboard/AIRecommendations';
+import { ExecutiveFeedbackPanel } from '@/components/ExecutiveFeedbackPanel';
 import { 
   programStatus, 
   subsystemRiskData, 
@@ -13,6 +14,7 @@ import {
   riskTimeData,
   aiSuggestions
 } from '@/data/mockDashboardData';
+import { executiveFeedback } from '@/data/mockFeedbackData';
 
 const ExecutiveDashboardPage = () => {
   return (
@@ -23,9 +25,13 @@ const ExecutiveDashboardPage = () => {
         {/* Program Health Status Bar */}
         <ProgramHealthStatus status={programStatus} />
 
-        {/* AI Recommendations */}
-        <div className="mb-6">
+        {/* Top Section - AI Recommendations and Executive Directives */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* AI Recommendations */}
           <AIRecommendations suggestions={aiSuggestions} />
+          
+          {/* Executive Directives */}
+          <ExecutiveFeedbackPanel feedback={executiveFeedback} />
         </div>
 
         {/* Middle Section - Risk Breakdown and Top Contributors */}
