@@ -19,11 +19,12 @@ import { PieChart, DollarSign, ClipboardCheck } from 'lucide-react';
 import { DashboardContent } from '@/components/DashboardContent';
 import MainNavigation from '@/components/MainNavigation';
 import { ApprovalRequestsContent } from '@/components/ApprovalRequestsContent';
+import { CostRiskAnalysisContent } from '@/components/cost-risk/CostRiskAnalysisContent';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const ManagerDashboardPage = () => {
   const isMobile = useIsMobile();
-  const [activeView, setActiveView] = useState<'dashboard' | 'approvals'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'approvals' | 'cost-risk'>('dashboard');
   
   return (
     <div className="flex flex-col h-screen">
@@ -31,19 +32,20 @@ const ManagerDashboardPage = () => {
       <div className="mb-4 px-6 pt-4">
         <Tabs 
           value={activeView} 
-          onValueChange={(value) => setActiveView(value as 'dashboard' | 'approvals')} 
+          onValueChange={(value) => setActiveView(value as 'dashboard' | 'approvals' | 'cost-risk')} 
           className="w-full"
         >
-          <TabsList className="grid w-[400px] grid-cols-2">
+          <TabsList className="grid w-[600px] grid-cols-3">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="approvals">Pending Approvals</TabsTrigger>
+            <TabsTrigger value="cost-risk">Cost Risk Analysis</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
       <SidebarProvider defaultOpen={true}>
         <div className="flex w-full flex-1 bg-background overflow-hidden">
           <DashboardSidebar 
-            activeMetric={activeView === 'dashboard' ? 'risk' : 'approvals'} 
+            activeMetric={activeView === 'dashboard' ? 'risk' : activeView === 'approvals' ? 'approvals' : 'cost'} 
             setActiveView={setActiveView}
           />
           
@@ -55,6 +57,9 @@ const ManagerDashboardPage = () => {
             <TabsContent value="approvals" className="flex-1 h-full m-0">
               <ApprovalRequestsContent />
             </TabsContent>
+            <TabsContent value="cost-risk" className="flex-1 h-full m-0">
+              <CostRiskAnalysisContent />
+            </TabsContent>
           </Tabs>
         </div>
       </SidebarProvider>
@@ -64,7 +69,7 @@ const ManagerDashboardPage = () => {
 
 interface DashboardSidebarProps {
   activeMetric: string;
-  setActiveView: (view: 'dashboard' | 'approvals') => void;
+  setActiveView: (view: 'dashboard' | 'approvals' | 'cost-risk') => void;
 }
 
 const DashboardSidebar = ({ activeMetric, setActiveView }: DashboardSidebarProps) => {
@@ -74,6 +79,8 @@ const DashboardSidebar = ({ activeMetric, setActiveView }: DashboardSidebarProps
     // Set the correct view based on menu selection
     if (metric === 'approvals') {
       setActiveView('approvals');
+    } else if (metric === 'cost') {
+      setActiveView('cost-risk');
     } else {
       setActiveView('dashboard');
     }
