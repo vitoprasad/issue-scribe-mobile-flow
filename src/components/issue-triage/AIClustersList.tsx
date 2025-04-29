@@ -5,7 +5,7 @@ import {
   TableHead, TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, X, Shield, Wrench, GitPullRequest, Check } from 'lucide-react';
+import { Pencil, X, Shield, Wrench, GitPullRequest } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuTrigger,
@@ -179,15 +179,6 @@ export const AIClustersList = () => {
                         title="View change log"
                       >
                         <GitPullRequest className="h-4 w-4 text-industrial-500" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleApproveCluster(cluster.id)}
-                        title="Approve"
-                        disabled={cluster.status === 'Approved'}
-                      >
-                        <Check className="h-4 w-4 text-green-500" />
                       </Button>
                     </div>
                   </TableCell>
