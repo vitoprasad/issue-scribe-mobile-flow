@@ -47,7 +47,7 @@ const mockData = [
         id: 'disc-001',
         timestamp: '2025-03-15T14:22:00Z',
         user: 'Sarah Chen',
-        message: 'I've seen this issue before. The wiring harness specification needs to be upgraded in the next revision.',
+        message: "I have seen this issue before. The wiring harness specification needs to be upgraded in the next revision.",
         responses: [
           {
             id: 'resp-001',
