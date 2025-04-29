@@ -8,8 +8,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Lightbulb, TrendingUp, ArrowRight } from 'lucide-react';
+import { Lightbulb, TrendingUp, ArrowRight, Link, Tag, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { formatCurrency } from '@/utils/formatters';
 
 interface AIRecommendationsProps {
   suggestions: AISuggestion[];
@@ -33,8 +34,50 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
     });
   };
 
+  const handleViewImpact = (suggestion: AISuggestion) => {
+    toast({
+      title: "Impact Analysis",
+      description: `Viewing detailed impact analysis for: ${suggestion.title}`,
+    });
+  };
+
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
+  };
+
+  // Function to determine if the suggestion aligns with executive directives
+  const getDirectiveAlignment = (category: string) => {
+    // This would ideally check against actual directives from executiveFeedback data
+    const highPriorityDirectives = ['cost', 'safety', 'quality'];
+    return highPriorityDirectives.includes(category);
+  };
+  
+  const getImpactIndicator = (impact: string) => {
+    if (impact === 'high') {
+      return (
+        <div className="flex items-center gap-1.5">
+          <span className="bg-red-500 h-2 w-2 rounded-full"></span>
+          <span className="bg-red-500 h-3 w-2 rounded-full"></span>
+          <span className="bg-red-500 h-4 w-2 rounded-full"></span>
+        </div>
+      );
+    } else if (impact === 'medium') {
+      return (
+        <div className="flex items-center gap-1.5">
+          <span className="bg-yellow-500 h-2 w-2 rounded-full"></span>
+          <span className="bg-yellow-500 h-3 w-2 rounded-full"></span>
+          <span className="bg-gray-300 h-4 w-2 rounded-full"></span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-1.5">
+          <span className="bg-green-500 h-2 w-2 rounded-full"></span>
+          <span className="bg-gray-300 h-3 w-2 rounded-full"></span>
+          <span className="bg-gray-300 h-4 w-2 rounded-full"></span>
+        </div>
+      );
+    }
   };
   
   return (
@@ -74,10 +117,30 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
                       suggestion.impact === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                     }`}></span>
                     <h3 className="font-medium text-sm">{suggestion.title}</h3>
+                    
+                    {getDirectiveAlignment(suggestion.category) && (
+                      <div className="ml-2 bg-blue-100 text-blue-800 text-xs py-0.5 px-2 rounded-full flex items-center">
+                        <Tag className="h-3 w-3 mr-1" />
+                        <span>Executive Priority</span>
+                      </div>
+                    )}
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 mt-1 inline-block">
-                    {suggestion.category.charAt(0).toUpperCase() + suggestion.category.slice(1)}
-                  </span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 inline-block">
+                      {suggestion.category.charAt(0).toUpperCase() + suggestion.category.slice(1)}
+                    </span>
+                    
+                    {suggestion.estimatedSavings && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-green-50 text-green-700 inline-block">
+                        Savings: {formatCurrency(suggestion.estimatedSavings)}
+                      </span>
+                    )}
+                    
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-slate-500">Impact:</span>
+                      {getImpactIndicator(suggestion.impact)}
+                    </div>
+                  </div>
                 </div>
                 <ArrowRight size={16} className={`transition-transform duration-200 ${expandedId === suggestion.id ? 'rotate-90' : ''}`} />
               </div>
@@ -85,7 +148,43 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
               {expandedId === suggestion.id && (
                 <div className="mt-3 animate-fade-in">
                   <p className="text-sm text-gray-600 mb-3">{suggestion.description}</p>
+                  
+                  {suggestion.relatedIssues && (
+                    <div className="bg-slate-50 p-2 rounded-md mb-3">
+                      <h4 className="text-xs font-medium text-slate-500 mb-1 flex items-center">
+                        <Link className="h-3 w-3 mr-1" />
+                        Related Issues
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {suggestion.relatedIssues.map((issue, idx) => (
+                          <div key={idx} className="text-xs px-2 py-0.5 bg-white border border-slate-200 rounded flex items-center">
+                            {issue}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {suggestion.impact === 'high' && (
+                    <div className="bg-red-50 p-2 rounded-md mb-3">
+                      <h4 className="text-xs font-medium text-red-700 mb-1 flex items-center">
+                        <BarChart3 className="h-3 w-3 mr-1" />
+                        Impact Analysis
+                      </h4>
+                      <p className="text-xs text-red-600">This issue affects multiple systems and requires immediate attention to mitigate risk.</p>
+                    </div>
+                  )}
+                  
                   <div className="flex space-x-2 justify-end">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewImpact(suggestion)}
+                    >
+                      <BarChart3 className="h-3 w-3 mr-1" />
+                      Impact
+                    </Button>
+                    
                     {suggestion.actionable && (
                       <>
                         <Button 

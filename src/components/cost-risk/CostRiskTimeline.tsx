@@ -1,61 +1,65 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  ChartContainer,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
+import { 
+  ResponsiveContainer, 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend 
 } from 'recharts';
+import { Ruler } from 'lucide-react';
 import { costRiskTimeline, costChartConfig } from '@/data/mockCostRiskData';
 import { formatCurrency } from '@/utils/formatters';
 
 export const CostRiskTimeline = () => {
+  const formatYAxis = (value: number) => {
+    return formatCurrency(value);
+  };
+
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">Cost Risk Timeline</CardTitle>
+        <div className="flex items-center gap-2">
+          <Ruler className="h-5 w-5 text-blue-600" />
+          <CardTitle className="text-lg font-medium">Cost Timeline</CardTitle>
+        </div>
       </CardHeader>
-      <CardContent>
-        <ChartContainer className="h-64" config={costChartConfig}>
+      <CardContent className="pt-4">
+        <div className="h-[240px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={costRiskTimeline}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <LineChart
+              data={costRiskTimeline}
+              margin={{
+                top: 5,
+                right: 20,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-              <YAxis tickFormatter={(value) => `$${(value/1000)}k`} />
-              <Tooltip 
-                formatter={(value) => [`${formatCurrency(value)}`, ""]}
-                labelFormatter={(label) => `Month: ${label}`}
-              />
+              <YAxis tickFormatter={formatYAxis} />
+              <Tooltip formatter={(value: number) => [formatCurrency(value), ""]} />
               <Legend />
               <Line
                 type="monotone"
                 dataKey="forecasted"
-                name="Forecasted Cost"
-                stroke="#8B5CF6"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
+                stroke={costChartConfig.forecasted.color}
+                name={costChartConfig.forecasted.label}
               />
               <Line
                 type="monotone"
                 dataKey="actual"
-                name="Actual Cost"
-                stroke="#ea384c"
-                strokeWidth={2}
-                dot={{ r: 4 }}
+                stroke={costChartConfig.actual.color}
+                name={costChartConfig.actual.label}
               />
             </LineChart>
           </ResponsiveContainer>
-        </ChartContainer>
+        </div>
       </CardContent>
     </Card>
   );

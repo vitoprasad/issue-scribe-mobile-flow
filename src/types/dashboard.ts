@@ -1,4 +1,3 @@
-
 export type ProgramStatus = "red" | "yellow" | "green";
 
 export interface RiskItem {
@@ -27,9 +26,12 @@ export interface AISuggestion {
   id: string;
   title: string;
   description: string;
-  impact: "high" | "medium" | "low";
-  category: "risk" | "process" | "resource";
+  category: string;
+  impact: 'high' | 'medium' | 'low';
   actionable: boolean;
+  estimatedSavings?: number;
+  relatedIssues?: string[];
+  implementationStatus?: 'pending' | 'in-progress' | 'completed';
 }
 
 export interface ExecutiveFeedback {

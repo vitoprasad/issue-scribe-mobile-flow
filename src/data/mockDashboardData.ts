@@ -1,4 +1,3 @@
-
 import { ProgramStatus, RiskItem, SubsystemRisk, RiskTimeData, AISuggestion } from "../types/dashboard";
 
 // Sample data for charts and tables
@@ -29,37 +28,44 @@ export const riskTimeData: RiskTimeData[] = [
   { month: 'Jun', high: 30, medium: 30, low: 40 },
 ];
 
-export const aiSuggestions: AISuggestion[] = [
+export const aiSuggestions = [
   {
-    id: "AI-001",
-    title: "Power System Risk Mitigation",
-    description: "Based on trending data, power system failures are increasing. Consider allocating additional engineering resources to investigate root causes.",
+    id: "ai-rec-001",
+    title: "Replace faulty wiring harnesses in propulsion control units",
+    description: "Analysis shows that 35% of propulsion failures are due to wiring harness degradation. Implementing a preventative replacement program could reduce downtime by 28%.",
+    category: "quality",
     impact: "high",
-    category: "risk",
-    actionable: true
+    actionable: true,
+    estimatedSavings: 156000,
+    relatedIssues: ["CL-2025-001", "CL-2025-004"],
   },
   {
-    id: "AI-002",
-    title: "Propulsion Testing Optimization",
-    description: "Current test protocols show redundancy. Streamlining could reduce schedule impact by approximately 14 days.",
+    id: "ai-rec-002",
+    title: "Recalibrate avionics sensor arrays across the fleet",
+    description: "Sensor drift detected in 17% of navigational arrays, contributing to inaccurate readings and unnecessary component replacements. Systemwide recalibration recommended.",
+    category: "cost",
     impact: "medium",
-    category: "process",
-    actionable: true
+    actionable: true,
+    estimatedSavings: 82500,
+    relatedIssues: ["CL-2025-002", "CL-2025-005"],
   },
   {
-    id: "AI-003",
-    title: "Cross-Functional Team Recommendation",
-    description: "Thermal and Avionics risk correlation suggests establishing a joint task force would improve issue resolution efficiency.",
-    impact: "medium",
-    category: "resource",
-    actionable: true
-  },
-  {
-    id: "AI-004",
-    title: "Supply Chain Risk Alert",
-    description: "Detected potential delays in critical components for structure subsystem based on vendor performance metrics.",
+    id: "ai-rec-003",
+    title: "Increase inspection frequency for cooling system components",
+    description: "Predictive models indicate early wear patterns in cooling system gaskets. Recommend increasing inspection intervals from 500 to 250 hours to prevent catastrophic failures.",
+    category: "safety",
     impact: "high",
-    category: "risk",
-    actionable: false
+    actionable: false,
+    relatedIssues: ["CL-2025-004"],
+  },
+  {
+    id: "ai-rec-004",
+    title: "Implement batch testing of hydraulic fluid for contamination",
+    description: "Data analysis reveals correlation between hydraulic system failures and particulate contamination. Recommend implementing batch testing protocol prior to fluid replacement.",
+    category: "maintenance",
+    impact: "low",
+    actionable: true,
+    estimatedSavings: 45000,
+    relatedIssues: ["CL-2025-003", "CL-2025-006"],
   }
 ];
