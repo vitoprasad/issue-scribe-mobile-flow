@@ -14,7 +14,8 @@ import {
   Tag,
   Plus,
   LinkIcon,
-  ShieldAlert
+  ShieldAlert,
+  TrendingUp  // Added missing import
 } from 'lucide-react';
 import { ExecutiveFeedback } from '@/types/dashboard';
 import { useToast } from "@/hooks/use-toast";
