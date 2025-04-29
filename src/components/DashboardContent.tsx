@@ -8,7 +8,9 @@ import { ProgramRiskSummary } from './ProgramRiskSummary';
 import { CostRiskMetric } from './CostRiskMetric';
 import { SidebarInset } from '@/components/ui/sidebar';
 import { ExecutiveFeedbackPanel } from './ExecutiveFeedbackPanel';
+import { AIRecommendations } from './dashboard/AIRecommendations';
 import { executiveFeedback } from '@/data/mockFeedbackData';
+import { aiSuggestions } from '@/data/mockDashboardData';
 import { ArrowDown } from 'lucide-react';
 
 export const DashboardContent = () => {
@@ -32,6 +34,11 @@ export const DashboardContent = () => {
             <ProgramRiskSummary />
           </div>
         </Card>
+      </div>
+      
+      {/* AI Strategic Recommendations */}
+      <div className="mb-6">
+        <AIRecommendations suggestions={aiSuggestions} />
       </div>
       
       <Card className="mb-6">
