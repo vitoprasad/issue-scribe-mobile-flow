@@ -15,16 +15,37 @@ import {
 } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from "@/hooks/use-toast";
-import { PieChart, DollarSign, ClipboardCheck } from 'lucide-react';
+import { PieChart, DollarSign, ClipboardCheck, Filter } from 'lucide-react';
 import { DashboardContent } from '@/components/DashboardContent';
 import MainNavigation from '@/components/MainNavigation';
 import { ApprovalRequestsContent } from '@/components/ApprovalRequestsContent';
 import { CostRiskAnalysisContent } from '@/components/cost-risk/CostRiskAnalysisContent';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { DashboardFilters } from '@/components/DashboardFilters';
+import { CostRiskMetric } from '@/components/CostRiskMetric';
+import { ProgramRiskSummary } from '@/components/ProgramRiskSummary';
+import { Button } from '@/components/ui/button';
 
 const ManagerDashboardPage = () => {
   const isMobile = useIsMobile();
   const [activeView, setActiveView] = useState<'dashboard' | 'approvals' | 'cost-risk'>('dashboard');
+  const [filters, setFilters] = useState({
+    program: 'all',
+    dateRange: '30days',
+    severity: 'all'
+  });
+  
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+  
+  const handleResetFilters = () => {
+    setFilters({
+      program: 'all',
+      dateRange: '30days',
+      severity: 'all'
+    });
+  };
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -47,6 +68,9 @@ const ManagerDashboardPage = () => {
           <DashboardSidebar 
             activeMetric={activeView === 'dashboard' ? 'risk' : activeView === 'approvals' ? 'approvals' : 'cost'} 
             setActiveView={setActiveView}
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onResetFilters={handleResetFilters}
           />
           
           {/* Use TabsContent components here for proper rendering */}
@@ -70,9 +94,22 @@ const ManagerDashboardPage = () => {
 interface DashboardSidebarProps {
   activeMetric: string;
   setActiveView: (view: 'dashboard' | 'approvals' | 'cost-risk') => void;
+  filters: {
+    program: string;
+    dateRange: string;
+    severity: string;
+  };
+  onFilterChange: (key: string, value: string) => void;
+  onResetFilters: () => void;
 }
 
-const DashboardSidebar = ({ activeMetric, setActiveView }: DashboardSidebarProps) => {
+const DashboardSidebar = ({ 
+  activeMetric, 
+  setActiveView,
+  filters,
+  onFilterChange,
+  onResetFilters
+}: DashboardSidebarProps) => {
   const { toast } = useToast();
   
   const handleMenuClick = (metric: string) => {
@@ -109,8 +146,45 @@ const DashboardSidebar = ({ activeMetric, setActiveView }: DashboardSidebarProps
       </SidebarHeader>
       
       <SidebarContent>
+        {/* Dashboard Filters Group */}
         <SidebarGroup>
-          <SidebarGroupLabel>Dashboard Metrics</SidebarGroupLabel>
+          <SidebarGroupLabel>
+            <div className="flex items-center">
+              <Filter className="w-4 h-4 mr-2" />
+              Dashboard Filters
+            </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent className="px-2">
+            <DashboardFilters 
+              filters={filters} 
+              onFilterChange={onFilterChange}
+              layout="vertical"
+            />
+            <div className="mt-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-xs"
+                onClick={onResetFilters}
+              >
+                Reset Filters
+              </Button>
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        {/* Summary Metrics Group */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Summary Metrics</SidebarGroupLabel>
+          <SidebarGroupContent className="space-y-2 px-2">
+            <CostRiskMetric sidebarVariant={true} />
+            <ProgramRiskSummary sidebarVariant={true} />
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        {/* Original Dashboard Metrics Group */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Dashboard Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>

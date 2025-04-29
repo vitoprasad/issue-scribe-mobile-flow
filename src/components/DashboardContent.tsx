@@ -2,10 +2,7 @@
 import React from 'react';
 import { ManagerDashboardHeader } from './ManagerDashboardHeader';
 import { RepairActionsTable } from './RepairActionsTable';
-import { DashboardFilters } from './DashboardFilters';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProgramRiskSummary } from './ProgramRiskSummary';
-import { CostRiskMetric } from './CostRiskMetric';
 import { SidebarInset } from '@/components/ui/sidebar';
 import { ExecutiveFeedbackPanel } from './ExecutiveFeedbackPanel';
 import { AIRecommendations } from './dashboard/AIRecommendations';
@@ -21,19 +18,6 @@ export const DashboardContent = () => {
       {/* Executive Feedback Panel - now minimizable */}
       <div className="mb-6">
         <ExecutiveFeedbackPanel feedback={executiveFeedback} />
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <Card className="p-4 lg:col-span-2">
-          <DashboardFilters />
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-medium text-sm mb-2 text-muted-foreground">Summary</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <CostRiskMetric />
-            <ProgramRiskSummary />
-          </div>
-        </Card>
       </div>
       
       {/* AI Strategic Recommendations */}
