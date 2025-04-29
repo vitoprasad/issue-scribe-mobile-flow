@@ -6,7 +6,6 @@ import { AISuggestion } from '@/types/dashboard';
 import { 
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Lightbulb, TrendingUp, ArrowRight } from 'lucide-react';
@@ -45,19 +44,17 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
           <Lightbulb className="h-5 w-5 text-primary mr-2" />
           <CardTitle className="text-lg font-medium">AI Strategic Recommendations</CardTitle>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="bg-primary/10 text-xs px-2 py-1 rounded-full text-primary font-medium flex items-center">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                Predictive
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-xs">Recommendations based on predictive analytics</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="bg-primary/10 text-xs px-2 py-1 rounded-full text-primary font-medium flex items-center">
+              <TrendingUp className="h-3 w-3 mr-1" />
+              Predictive
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="text-xs">Recommendations based on predictive analytics</p>
+          </TooltipContent>
+        </Tooltip>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
