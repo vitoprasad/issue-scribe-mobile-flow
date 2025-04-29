@@ -5,14 +5,21 @@ import {
   TableHead, TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, X, Shield, Wrench, GitPullRequest, Plus, UserPlus, Check, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from 'lucide-react';
+import { Pencil, X, Shield, Wrench, GitPullRequest, Plus, UserPlus, Check } from 'lucide-react';
+import { 
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
 import { useIssueTriage } from '@/contexts/IssueTriageContext';
 import { filterClusters } from '@/utils/issue-triage-utils';
 
 export const ManualClustersList = () => {
   const { 
     manualClusters, 
-    selectedManualClusters, 
+    selectedManualClusters,
+    setSelectedManualClusters, 
     filters, 
     handleClusterAction, 
     toggleClusterSelection, 

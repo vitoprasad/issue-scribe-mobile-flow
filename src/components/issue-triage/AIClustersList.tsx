@@ -5,14 +5,21 @@ import {
   TableHead, TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, X, Shield, Wrench, GitPullRequest, Check, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from 'lucide-react';
+import { Pencil, X, Shield, Wrench, GitPullRequest, Check } from 'lucide-react';
+import { 
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
 import { useIssueTriage } from '@/contexts/IssueTriageContext';
 import { filterClusters } from '@/utils/issue-triage-utils';
 
 export const AIClustersList = () => {
   const { 
     clusters, 
-    selectedClusters, 
+    selectedClusters,
+    setSelectedClusters,
     filters, 
     handleClusterAction, 
     toggleClusterSelection, 
@@ -58,7 +65,7 @@ export const AIClustersList = () => {
                     if (selectedClusters.length === filteredClusters.length) {
                       setSelectedClusters([]);
                     } else {
-                      toggleClusterSelection(filteredClusters.map(c => c.id));
+                      setSelectedClusters(filteredClusters.map(c => c.id));
                     }
                   }}
                 />
