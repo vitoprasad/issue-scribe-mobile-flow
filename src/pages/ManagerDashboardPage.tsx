@@ -146,43 +146,7 @@ const DashboardSidebar = ({
       </SidebarHeader>
       
       <SidebarContent>
-        {/* Dashboard Filters Group */}
-        <SidebarGroup>
-          <SidebarGroupLabel>
-            <div className="flex items-center">
-              <Filter className="w-4 h-4 mr-2" />
-              Dashboard Filters
-            </div>
-          </SidebarGroupLabel>
-          <SidebarGroupContent className="px-2">
-            <DashboardFilters 
-              filters={filters} 
-              onFilterChange={onFilterChange}
-              layout="vertical"
-            />
-            <div className="mt-3">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full text-xs"
-                onClick={onResetFilters}
-              >
-                Reset Filters
-              </Button>
-            </div>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        
-        {/* Summary Metrics Group */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Summary Metrics</SidebarGroupLabel>
-          <SidebarGroupContent className="space-y-2 px-2">
-            <CostRiskMetric sidebarVariant={true} />
-            <ProgramRiskSummary sidebarVariant={true} />
-          </SidebarGroupContent>
-        </SidebarGroup>
-        
-        {/* Original Dashboard Metrics Group */}
+        {/* Dashboard Navigation Group - MOVED TO TOP */}
         <SidebarGroup>
           <SidebarGroupLabel>Dashboard Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -218,6 +182,42 @@ const DashboardSidebar = ({
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        {/* Dashboard Filters Group - NOW POSITIONED AFTER NAVIGATION */}
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <div className="flex items-center">
+              <Filter className="w-4 h-4 mr-2" />
+              Dashboard Filters
+            </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent className="px-2">
+            <DashboardFilters 
+              filters={filters} 
+              onFilterChange={onFilterChange}
+              layout="vertical"
+            />
+            <div className="mt-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-xs"
+                onClick={onResetFilters}
+              >
+                Reset Filters
+              </Button>
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        {/* Summary Metrics Group */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Summary Metrics</SidebarGroupLabel>
+          <SidebarGroupContent className="space-y-2 px-2">
+            <CostRiskMetric sidebarVariant={true} />
+            <ProgramRiskSummary sidebarVariant={true} />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
