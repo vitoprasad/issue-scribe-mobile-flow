@@ -39,3 +39,20 @@ export type QuickResponseTemplate = {
   label: string;
   template: string;
 };
+
+export type RepairAction = {
+  id: string;
+  parts: string[];
+  systems: string[];
+  riskLevel: string;
+  costSavings: number;
+  timeSavings: number;
+  suggestedAction: string;
+  submittedBy?: string;
+  submissionDate?: string;
+  aiConfidence?: number;
+  notes?: string;
+  similarIssues?: string[];
+  changelog?: ChangeLogEntry[];
+  discussion?: DiscussionItem[];
+};
