@@ -4,7 +4,7 @@ import {
   TableHead, TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, X, Filter, Calendar, Info, Clock, Users, Shield, Wrench, MessageSquare, GitPullRequest } from 'lucide-react';
+import { Pencil, X, Filter, Calendar, Info, Clock, Users, Shield, Wrench, MessageSquare, GitPullRequest, Plus, UserPlus, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
@@ -15,13 +15,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import { Input } from '@/components/ui/input';
 
 // Define the type for issue clusters
 interface IssueCluster {
   id: string;
   affectedParts: string[];
   likelyFix: string;
-  confidence: number;
+  confidence?: number;
   program: string;
   severity: 'High' | 'Medium' | 'Low';
   date: string;
@@ -29,6 +30,9 @@ interface IssueCluster {
   changelog?: ChangeLogEntry[];
   status?: 'Pending' | 'Approved' | 'Rejected';
   submissionType?: 'Standard Repair' | 'Containment' | null;
+  source?: 'AI' | 'Manual';
+  creator?: string;
+  justification?: string;
 }
 
 // Define type for change log entries
@@ -67,6 +71,38 @@ interface Containment {
   status: 'Active' | 'Pending Review' | 'Completed';
 }
 
+// Define the type for manual cluster form values
+interface ManualClusterFormValues {
+  affectedParts: string;
+  likelyFix: string;
+  program: string;
+  severity: 'High' | 'Medium' | 'Low';
+  justification: string;
+  source: string;
+}
+
+// Define the type for filters
+interface Filters {
+  program: string;
+  severity: string;
+  startDate: string;
+  endDate: string;
+  team: string;
+  status: string;
+  source?: string;
+}
+
+// Define interfaces for forms
+interface RejectFormValues {
+  comment: string;
+}
+
+interface SubmissionFormValues {
+  submissionType: 'Standard Repair' | 'Containment';
+  targetTeam: string;
+  comment: string;
+}
+
 // Mock data for demonstration
 const mockClusters: IssueCluster[] = [
   {
@@ -78,7 +114,8 @@ const mockClusters: IssueCluster[] = [
     severity: 'High',
     date: '2025-04-25',
     status: 'Pending',
-    changelog: []
+    changelog: [],
+    source: 'AI'
   },
   {
     id: 'CL-002',
@@ -89,7 +126,8 @@ const mockClusters: IssueCluster[] = [
     severity: 'Medium',
     date: '2025-04-26',
     status: 'Pending',
-    changelog: []
+    changelog: [],
+    source: 'AI'
   },
   {
     id: 'CL-003',
@@ -100,7 +138,8 @@ const mockClusters: IssueCluster[] = [
     severity: 'Low',
     date: '2025-04-27',
     status: 'Pending',
-    changelog: []
+    changelog: [],
+    source: 'AI'
   },
   {
     id: 'CL-004',
@@ -111,7 +150,8 @@ const mockClusters: IssueCluster[] = [
     severity: 'High',
     date: '2025-04-28',
     status: 'Pending',
-    changelog: []
+    changelog: [],
+    source: 'AI'
   },
   {
     id: 'CL-005',
@@ -122,7 +162,67 @@ const mockClusters: IssueCluster[] = [
     severity: 'Medium',
     date: '2025-04-28',
     status: 'Pending',
-    changelog: []
+    changelog: [],
+    source: 'AI'
+  }
+];
+
+// Mock data for manually created clusters
+const mockManualClusters: IssueCluster[] = [
+  {
+    id: 'MC-001',
+    affectedParts: ['F678', 'F679'],
+    likelyFix: 'Replacement of worn seals on hydraulic assembly',
+    program: 'Alpha',
+    severity: 'High',
+    date: '2025-04-24',
+    status: 'Pending',
+    changelog: [],
+    source: 'Manual',
+    creator: 'John Smith',
+    justification: 'Visual inspection revealed consistent pattern of seal wear across multiple assemblies'
+  },
+  {
+    id: 'MC-002',
+    affectedParts: ['G789', 'G790', 'G791'],
+    likelyFix: 'Update torque specifications for connector installation',
+    program: 'Beta',
+    severity: 'Medium',
+    date: '2025-04-23',
+    status: 'Approved',
+    changelog: [
+      {
+        id: 'log-1',
+        timestamp: '2025-04-23T14:30:00',
+        user: 'James Wilson',
+        action: 'Created',
+        comment: 'Created based on field failures analysis'
+      },
+      {
+        id: 'log-2',
+        timestamp: '2025-04-24T09:15:00',
+        user: 'Maria Chen',
+        action: 'Approved',
+        comment: 'Approved after verification with test data'
+      }
+    ],
+    source: 'Manual',
+    creator: 'James Wilson',
+    justification: 'Analysis of field failures showed consistent pattern of under-torqued connectors'
+  },
+  {
+    id: 'MC-003',
+    affectedParts: ['H890', 'H891'],
+    likelyFix: 'Modify fixture design to prevent component misalignment',
+    program: 'Charlie',
+    severity: 'High',
+    date: '2025-04-22',
+    status: 'Pending',
+    submissionType: 'Standard Repair',
+    changelog: [],
+    source: 'Manual',
+    creator: 'Emily Johnson',
+    justification: 'Observed consistent misalignment issues during assembly process review'
   }
 ];
 
@@ -226,40 +326,22 @@ const mockContainments: Containment[] = [
   }
 ];
 
-// Define the type for filters
-interface Filters {
-  program: string;
-  severity: string;
-  startDate: string;
-  endDate: string;
-  team: string;
-  status: string;
-}
-
-// Define interfaces for forms
-interface RejectFormValues {
-  comment: string;
-}
-
-interface SubmissionFormValues {
-  submissionType: 'Standard Repair' | 'Containment';
-  targetTeam: string;
-  comment: string;
-}
-
 const IssueTriagePage = () => {
   const { toast } = useToast();
   const [clusters, setClusters] = useState<IssueCluster[]>(mockClusters);
+  const [manualClusters, setManualClusters] = useState<IssueCluster[]>(mockManualClusters);
   const [standardRepairs, setStandardRepairs] = useState<StandardRepair[]>(mockStandardRepairs);
   const [containments, setContainments] = useState<Containment[]>(mockContainments);
   const [selectedClusters, setSelectedClusters] = useState<string[]>([]);
+  const [selectedManualClusters, setSelectedManualClusters] = useState<string[]>([]);
   const [filters, setFilters] = useState<Filters>({ 
     program: '', 
     severity: '', 
     startDate: '', 
     endDate: '',
     team: '',
-    status: ''
+    status: '',
+    source: ''
   });
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentCluster, setCurrentCluster] = useState<IssueCluster | null>(null);
@@ -268,6 +350,7 @@ const IssueTriagePage = () => {
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
   const [isChangelogDialogOpen, setIsChangelogDialogOpen] = useState(false);
   const [currentChangeLogEntry, setCurrentChangeLogEntry] = useState<string>('');
+  const [isCreateManualClusterDialogOpen, setIsCreateManualClusterDialogOpen] = useState(false);
   
   // Initialize form hooks
   const rejectForm = useForm<RejectFormValues>({
@@ -281,6 +364,17 @@ const IssueTriagePage = () => {
       submissionType: 'Standard Repair',
       targetTeam: '',
       comment: ''
+    }
+  });
+  
+  const manualClusterForm = useForm<ManualClusterFormValues>({
+    defaultValues: {
+      affectedParts: '',
+      likelyFix: '',
+      program: '',
+      severity: 'Medium',
+      justification: '',
+      source: ''
     }
   });
   
@@ -298,14 +392,16 @@ const IssueTriagePage = () => {
   // Calculate summary metrics
   const openClusters = clusters.length;
   const avgConfidence = clusters.length > 0 
-    ? Math.round(clusters.reduce((sum, cluster) => sum + cluster.confidence, 0) / clusters.length) 
+    ? Math.round(clusters.reduce((sum, cluster) => sum + (cluster.confidence || 0), 0) / clusters.length) 
     : 0;
+  const openManualClusters = manualClusters.length;
   const activeStandardRepairs = standardRepairs.filter(repair => repair.status === 'Active').length;
   const activeContainments = containments.filter(containment => containment.status === 'Active').length;
 
   // Filter unique programs and severities for filter dropdown options
   const uniquePrograms = [...new Set([
     ...clusters.map(cluster => cluster.program),
+    ...manualClusters.map(cluster => cluster.program),
     ...standardRepairs.map(repair => repair.program),
     ...containments.map(containment => containment.program)
   ])];
@@ -329,6 +425,16 @@ const IssueTriagePage = () => {
 
   // Apply filters to clusters
   const filteredClusters = clusters.filter(cluster => {
+    return (
+      (filters.program === '' || cluster.program === filters.program) &&
+      (filters.severity === '' || cluster.severity === filters.severity) &&
+      (filters.startDate === '' || new Date(cluster.date) >= new Date(filters.startDate)) &&
+      (filters.endDate === '' || new Date(cluster.date) <= new Date(filters.endDate))
+    );
+  });
+  
+  // Apply filters to manual clusters
+  const filteredManualClusters = manualClusters.filter(cluster => {
     return (
       (filters.program === '' || cluster.program === filters.program) &&
       (filters.severity === '' || cluster.severity === filters.severity) &&
@@ -360,17 +466,26 @@ const IssueTriagePage = () => {
   });
 
   // Handle cluster selection
-  const toggleClusterSelection = (clusterId: string) => {
-    setSelectedClusters(prev => 
-      prev.includes(clusterId) 
-        ? prev.filter(id => id !== clusterId)
-        : [...prev, clusterId]
-    );
+  const toggleClusterSelection = (clusterId: string, isManual = false) => {
+    if (isManual) {
+      setSelectedManualClusters(prev => 
+        prev.includes(clusterId) 
+          ? prev.filter(id => id !== clusterId)
+          : [...prev, clusterId]
+      );
+    } else {
+      setSelectedClusters(prev => 
+        prev.includes(clusterId) 
+          ? prev.filter(id => id !== clusterId)
+          : [...prev, clusterId]
+      );
+    }
   };
 
   // Handle bulk actions
-  const handleBulkAction = (action: 'modify' | 'reject') => {
-    if (selectedClusters.length === 0) {
+  const handleBulkAction = (action: 'modify' | 'reject', isManual = false) => {
+    const selectedIds = isManual ? selectedManualClusters : selectedClusters;
+    if (selectedIds.length === 0) {
       toast({
         title: "No clusters selected",
         description: "Please select clusters to perform this action.",
@@ -382,12 +497,16 @@ const IssueTriagePage = () => {
     // In a real application, this would send the action to an API
     toast({
       title: "Action performed",
-      description: `${action.charAt(0).toUpperCase() + action.slice(1)}ed ${selectedClusters.length} clusters.`,
+      description: `${action.charAt(0).toUpperCase() + action.slice(1)}ed ${selectedIds.length} clusters.`,
       variant: "default"
     });
 
     // Clear selection after action
-    setSelectedClusters([]);
+    if (isManual) {
+      setSelectedManualClusters([]);
+    } else {
+      setSelectedClusters([]);
+    }
   };
 
   // Handle individual cluster action
@@ -414,9 +533,51 @@ const IssueTriagePage = () => {
     }
   };
 
+  // Function to handle creating a new manual cluster
+  const handleCreateManualCluster = (data: ManualClusterFormValues) => {
+    const newCluster: IssueCluster = {
+      id: `MC-${String(manualClusters.length + 1).padStart(3, '0')}`,
+      affectedParts: data.affectedParts.split(',').map(part => part.trim()),
+      likelyFix: data.likelyFix,
+      program: data.program,
+      severity: data.severity,
+      date: new Date().toISOString().split('T')[0],
+      status: 'Pending',
+      source: 'Manual',
+      creator: 'Current User',
+      justification: data.justification,
+      changelog: [
+        {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          user: 'Current User',
+          action: 'Created',
+          comment: data.justification
+        }
+      ]
+    };
+    
+    setManualClusters(prev => [...prev, newCluster]);
+    
+    toast({
+      title: "Manual cluster created",
+      description: `Cluster ${newCluster.id} has been created successfully.`,
+    });
+    
+    setIsCreateManualClusterDialogOpen(false);
+    manualClusterForm.reset({
+      affectedParts: '',
+      likelyFix: '',
+      program: '',
+      severity: 'Medium',
+      justification: '',
+      source: ''
+    });
+  };
+
   // New function to handle cluster rejection
   const handleRejectCluster = (clusterId: string, reason: string) => {
-    setClusters(prev => prev.map(cluster => {
+    const updateClusterList = (list: IssueCluster[]) => list.map(cluster => {
       if (cluster.id === clusterId) {
         const newChangelogEntry: ChangeLogEntry = {
           id: `log-${Date.now()}`,
@@ -434,11 +595,19 @@ const IssueTriagePage = () => {
         };
       }
       return cluster;
-    }));
+    });
+    
+    // Check if the cluster is in AI clusters or manual clusters
+    const aiCluster = clusters.find(c => c.id === clusterId);
+    if (aiCluster) {
+      setClusters(updateClusterList(clusters));
+    } else {
+      setManualClusters(updateClusterList(manualClusters));
+    }
     
     toast({
       title: "Cluster Rejected",
-      description: `Feedback recorded for AI improvement.`,
+      description: `Feedback recorded for improvement.`,
     });
     
     setIsRejectDialogOpen(false);
@@ -446,7 +615,7 @@ const IssueTriagePage = () => {
   
   // New function to handle submission for approval
   const handleSubmitForApproval = (clusterId: string, values: SubmissionFormValues) => {
-    setClusters(prev => prev.map(cluster => {
+    const updateClusterList = (list: IssueCluster[]) => list.map(cluster => {
       if (cluster.id === clusterId) {
         const newChangelogEntry: ChangeLogEntry = {
           id: `log-${Date.now()}`,
@@ -463,7 +632,15 @@ const IssueTriagePage = () => {
         };
       }
       return cluster;
-    }));
+    });
+    
+    // Check if the cluster is in AI clusters or manual clusters
+    const aiCluster = clusters.find(c => c.id === clusterId);
+    if (aiCluster) {
+      setClusters(updateClusterList(clusters));
+    } else {
+      setManualClusters(updateClusterList(manualClusters));
+    }
     
     toast({
       title: "Submitted for Approval",
@@ -475,14 +652,14 @@ const IssueTriagePage = () => {
   
   // New function to approve a cluster
   const handleApproveCluster = (clusterId: string) => {
-    setClusters(prev => prev.map(cluster => {
+    const updateClusterList = (list: IssueCluster[]) => list.map(cluster => {
       if (cluster.id === clusterId) {
         const newChangelogEntry: ChangeLogEntry = {
           id: `log-${Date.now()}`,
           timestamp: new Date().toISOString(),
           user: 'Current User',
           action: 'Approved',
-          comment: 'Approved cluster and AI suggestion.'
+          comment: 'Approved cluster suggestion.'
         };
         
         return {
@@ -492,7 +669,15 @@ const IssueTriagePage = () => {
         };
       }
       return cluster;
-    }));
+    });
+    
+    // Check if the cluster is in AI clusters or manual clusters
+    const aiCluster = clusters.find(c => c.id === clusterId);
+    if (aiCluster) {
+      setClusters(updateClusterList(clusters));
+    } else {
+      setManualClusters(updateClusterList(manualClusters));
+    }
     
     toast({
       title: "Cluster Approved",
@@ -510,7 +695,7 @@ const IssueTriagePage = () => {
   const handleAddChangelog = () => {
     if (!currentCluster || !currentChangeLogEntry.trim()) return;
     
-    setClusters(prev => prev.map(cluster => {
+    const updateClusterList = (list: IssueCluster[]) => list.map(cluster => {
       if (cluster.id === currentCluster.id) {
         const newChangelogEntry: ChangeLogEntry = {
           id: `log-${Date.now()}`,
@@ -526,7 +711,15 @@ const IssueTriagePage = () => {
         };
       }
       return cluster;
-    }));
+    });
+    
+    // Check if the cluster is in AI clusters or manual clusters
+    const aiCluster = clusters.find(c => c.id === currentCluster.id);
+    if (aiCluster) {
+      setClusters(updateClusterList(clusters));
+    } else {
+      setManualClusters(updateClusterList(manualClusters));
+    }
     
     setCurrentChangeLogEntry('');
     
@@ -566,7 +759,7 @@ const IssueTriagePage = () => {
               </select>
             </div>
             
-            {activeTab === 'clusters' && (
+            {(activeTab === 'clusters' || activeTab === 'manual-clusters') && (
               <div>
                 <label className="text-xs text-industrial-500 mb-1 block">Severity</label>
                 <select 
@@ -648,11 +841,15 @@ const IssueTriagePage = () => {
           
           <div className="grid grid-cols-2 gap-2">
             <div className="bg-industrial-50 p-3 rounded">
-              <div className="text-xs text-industrial-500">Open Clusters</div>
+              <div className="text-xs text-industrial-500">AI Clusters</div>
               <div className="text-lg font-bold text-industrial-700">{openClusters}</div>
             </div>
             <div className="bg-industrial-50 p-3 rounded">
-              <div className="text-xs text-industrial-500">Avg. Confidence</div>
+              <div className="text-xs text-industrial-500">Manual Clusters</div>
+              <div className="text-lg font-bold text-industrial-700">{openManualClusters}</div>
+            </div>
+            <div className="bg-industrial-50 p-3 rounded">
+              <div className="text-xs text-industrial-500">AI Confidence</div>
               <div className="text-lg font-bold text-industrial-700">{avgConfidence}%</div>
             </div>
             <div className="bg-industrial-50 p-3 rounded">
@@ -670,7 +867,7 @@ const IssueTriagePage = () => {
           <Button 
             className="w-full" 
             variant="outline"
-            onClick={() => setFilters({ program: '', severity: '', startDate: '', endDate: '', team: '', status: '' })}
+            onClick={() => setFilters({ program: '', severity: '', startDate: '', endDate: '', team: '', status: '', source: '' })}
           >
             Reset Filters
           </Button>
@@ -683,11 +880,12 @@ const IssueTriagePage = () => {
           <div className="mb-6 flex items-center justify-between">
             <TabsList>
               <TabsTrigger value="clusters">AI-Clustered Issues</TabsTrigger>
+              <TabsTrigger value="manual-clusters">Manual Clusters</TabsTrigger>
               <TabsTrigger value="standard-repairs">Standard Repairs</TabsTrigger>
               <TabsTrigger value="containments">Containments & Escalations</TabsTrigger>
             </TabsList>
             
-            {/* Bulk Actions - only show for clusters tab */}
+            {/* Tab-specific actions */}
             {activeTab === 'clusters' && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-industrial-500">
@@ -701,6 +899,34 @@ const IssueTriagePage = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => handleBulkAction('reject')}>
+                      <X className="mr-2 h-4 w-4 text-red-500" /> Reject All
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+            
+            {/* Add "Create New Cluster" button for manual clusters tab */}
+            {activeTab === 'manual-clusters' && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-industrial-500">
+                  {selectedManualClusters.length} selected
+                </span>
+                <Button 
+                  variant="default" 
+                  onClick={() => setIsCreateManualClusterDialogOpen(true)}
+                  className="ml-2"
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Create New Cluster
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" disabled={selectedManualClusters.length === 0}>
+                      Bulk Disposition
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleBulkAction('reject', true)}>
                       <X className="mr-2 h-4 w-4 text-red-500" /> Reject All
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -783,8 +1009,8 @@ const IssueTriagePage = () => {
                           <div className="flex justify-center items-center">
                             <div 
                               className={`font-bold ${
-                                cluster.confidence >= 90 ? 'text-green-600' : 
-                                cluster.confidence >= 75 ? 'text-amber-600' : 
+                                (cluster.confidence || 0) >= 90 ? 'text-green-600' : 
+                                (cluster.confidence || 0) >= 75 ? 'text-amber-600' : 
                                 'text-red-600'
                               }`}
                             >
@@ -838,6 +1064,152 @@ const IssueTriagePage = () => {
                               title="View change log"
                             >
                               <GitPullRequest className="h-4 w-4 text-industrial-500" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleApproveCluster(cluster.id)}
+                              title="Approve"
+                              disabled={cluster.status === 'Approved'}
+                            >
+                              <Check className="h-4 w-4 text-green-500" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+          
+          {/* Manual Clusters Table */}
+          <TabsContent value="manual-clusters" className="mt-0">
+            <div className="bg-white border border-industrial-100 rounded-md shadow-sm">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-industrial-50">
+                    <TableHead className="w-12">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-industrial-300"
+                        checked={selectedManualClusters.length === filteredManualClusters.length && filteredManualClusters.length > 0}
+                        onChange={() => {
+                          if (selectedManualClusters.length === filteredManualClusters.length) {
+                            setSelectedManualClusters([]);
+                          } else {
+                            setSelectedManualClusters(filteredManualClusters.map(c => c.id));
+                          }
+                        }}
+                      />
+                    </TableHead>
+                    <TableHead>Cluster ID</TableHead>
+                    <TableHead>Affected Parts</TableHead>
+                    <TableHead className="w-1/4">Suggested Fix</TableHead>
+                    <TableHead>Created By</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredManualClusters.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-industrial-500">
+                        No manual clusters match the current filters
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredManualClusters.map((cluster) => (
+                      <TableRow key={cluster.id} className={`border-b border-industrial-100 ${
+                        cluster.status === 'Approved' ? 'bg-green-50' :
+                        cluster.status === 'Rejected' ? 'bg-red-50' : ''
+                      }`}>
+                        <TableCell>
+                          <input 
+                            type="checkbox" 
+                            className="rounded border-industrial-300"
+                            checked={selectedManualClusters.includes(cluster.id)}
+                            onChange={() => toggleClusterSelection(cluster.id, true)}
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">{cluster.id}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {cluster.affectedParts.map(part => (
+                              <span 
+                                key={part} 
+                                className="bg-industrial-100 text-industrial-700 text-xs px-2 py-1 rounded"
+                              >
+                                {part}
+                              </span>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {cluster.likelyFix}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <UserPlus className="h-3 w-3 text-industrial-500 mr-1" />
+                            <span>{cluster.creator}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                            cluster.status === 'Approved' ? 'bg-green-100 text-green-700' : 
+                            cluster.status === 'Rejected' ? 'bg-red-100 text-red-700' : 
+                            'bg-blue-100 text-blue-700'
+                          }`}>
+                            {cluster.status || 'Pending'}
+                            {cluster.submissionType && ` - ${cluster.submissionType}`}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleClusterAction(cluster, 'modify')}
+                              title="Modify"
+                            >
+                              <Pencil className="h-4 w-4 text-blue-500" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleClusterAction(cluster, 'reject')}
+                              title="Reject"
+                            >
+                              <X className="h-4 w-4 text-red-500" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleClusterAction(cluster, 'submit')}
+                              title="Submit for approval"
+                            >
+                              {cluster.submissionType === 'Standard Repair' ? 
+                                <Wrench className="h-4 w-4 text-amber-500" /> : 
+                                <Shield className="h-4 w-4 text-purple-500" />
+                              }
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleClusterAction(cluster, 'changelog')}
+                              title="View change log"
+                            >
+                              <GitPullRequest className="h-4 w-4 text-industrial-500" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleApproveCluster(cluster.id)}
+                              title="Approve"
+                              disabled={cluster.status === 'Approved'}
+                            >
+                              <Check className="h-4 w-4 text-green-500" />
                             </Button>
                           </div>
                         </TableCell>
@@ -1044,11 +1416,11 @@ const IssueTriagePage = () => {
                     name="comment"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Reason for rejection (provides feedback to AI system)</FormLabel>
+                        <FormLabel>Reason for rejection (provides feedback to improve system)</FormLabel>
                         <FormControl>
                           <Textarea 
                             className="min-h-[100px]"
-                            placeholder="Please provide detailed feedback to help improve AI suggestions"
+                            placeholder="Please provide detailed feedback to help improve suggestions"
                             {...field}
                           />
                         </FormControl>
@@ -1210,6 +1582,142 @@ const IssueTriagePage = () => {
               </div>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Create Manual Cluster Dialog */}
+      <Dialog open={isCreateManualClusterDialogOpen} onOpenChange={setIsCreateManualClusterDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Manual Cluster</DialogTitle>
+          </DialogHeader>
+          
+          <Form {...manualClusterForm}>
+            <form onSubmit={manualClusterForm.handleSubmit(handleCreateManualCluster)} className="space-y-4">
+              <FormField
+                control={manualClusterForm.control}
+                name="affectedParts"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Affected Parts (comma separated)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. A123, A124, A125" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={manualClusterForm.control}
+                name="likelyFix"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Suggested Fix</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Describe the suggested fix for these issues"
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={manualClusterForm.control}
+                  name="program"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Program</FormLabel>
+                      <FormControl>
+                        <select
+                          className="w-full h-9 rounded border border-input bg-background px-3 py-2 text-sm"
+                          {...field}
+                        >
+                          <option value="">Select a program...</option>
+                          {uniquePrograms.map(program => (
+                            <option key={program} value={program}>{program}</option>
+                          ))}
+                        </select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={manualClusterForm.control}
+                  name="severity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Severity</FormLabel>
+                      <FormControl>
+                        <select
+                          className="w-full h-9 rounded border border-input bg-background px-3 py-2 text-sm"
+                          {...field}
+                        >
+                          {severityOptions.map(severity => (
+                            <option key={severity} value={severity}>{severity}</option>
+                          ))}
+                        </select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={manualClusterForm.control}
+                name="source"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Source Information</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Field observation, Inspection findings, etc." {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={manualClusterForm.control}
+                name="justification"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Justification / Notes</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Provide reasoning and supporting details for this cluster"
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex justify-end gap-2 pt-4">
+                <Button 
+                  variant="outline" 
+                  type="button"
+                  onClick={() => setIsCreateManualClusterDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={
+                    !manualClusterForm.watch("affectedParts") || 
+                    !manualClusterForm.watch("likelyFix") || 
+                    !manualClusterForm.watch("program")
+                  }
+                >
+                  Create Cluster
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>
