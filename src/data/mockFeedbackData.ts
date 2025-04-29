@@ -11,7 +11,8 @@ export const executiveFeedback: ExecutiveFeedback[] = [
     createdAt: "2025-04-22T10:30:00Z",
     status: "new",
     assignee: "Engineering Team Lead",
-    tags: ["Propulsion", "High Priority"]
+    tags: ["Propulsion", "High Priority"],
+    targetedRisks: ["R-001", "R-023"]
   },
   {
     id: "EF-002",
@@ -22,7 +23,8 @@ export const executiveFeedback: ExecutiveFeedback[] = [
     createdAt: "2025-04-20T14:15:00Z",
     status: "in-progress",
     assignee: "QA Manager",
-    tags: ["Power Distribution", "Cost Reduction"]
+    tags: ["Power Distribution", "Cost Reduction"],
+    targetedRisks: ["R-001"]
   },
   {
     id: "EF-003",
@@ -32,7 +34,8 @@ export const executiveFeedback: ExecutiveFeedback[] = [
     category: "inquiry",
     createdAt: "2025-04-18T09:45:00Z",
     status: "new",
-    tags: ["Avionics", "Risk Analysis"]
+    tags: ["Avionics", "Risk Analysis"],
+    targetedRisks: ["R-015"]
   },
   {
     id: "EF-004",
@@ -42,6 +45,7 @@ export const executiveFeedback: ExecutiveFeedback[] = [
     category: "notification",
     createdAt: "2025-04-15T16:20:00Z",
     status: "completed",
-    tags: ["Thermal", "Budget"]
+    tags: ["Thermal", "Budget"],
+    targetedRisks: ["R-009"]
   }
 ];

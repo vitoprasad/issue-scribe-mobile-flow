@@ -12,7 +12,9 @@ import {
   ChevronDown, 
   ChevronUp, 
   Tag,
-  Plus
+  Plus,
+  LinkIcon,
+  ShieldAlert
 } from 'lucide-react';
 import { ExecutiveFeedback } from '@/types/dashboard';
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +22,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { topRiskContributors } from '@/data/mockDashboardData';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface ExecutiveFeedbackPanelProps {
   feedback: ExecutiveFeedback[];
@@ -31,12 +36,22 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
   const [activeFeedback, setActiveFeedback] = useState<ExecutiveFeedback[]>(feedback);
   const [isMinimized, setIsMinimized] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [risksSheetOpen, setRisksSheetOpen] = useState(false);
+  const [selectedRiskIds, setSelectedRiskIds] = useState<string[]>([]);
   const [newDirective, setNewDirective] = useState({
     title: '',
     description: '',
     priority: 'medium',
     category: 'directive',
   });
+
+  const handleRiskSelectionChange = (riskId: string, isSelected: boolean) => {
+    setSelectedRiskIds((prev) => 
+      isSelected 
+        ? [...prev, riskId]
+        : prev.filter(id => id !== riskId)
+    );
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -78,10 +93,12 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
       category: newDirective.category as "directive" | "inquiry" | "notification",
       createdAt: new Date().toISOString(),
       status: "new",
+      targetedRisks: selectedRiskIds.length > 0 ? selectedRiskIds : undefined
     };
 
     setActiveFeedback([...activeFeedback, directive]);
     setDialogOpen(false);
+    setSelectedRiskIds([]);
     setNewDirective({
       title: '',
       description: '',
@@ -91,7 +108,9 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
 
     toast({
       title: "Directive Added",
-      description: "New executive directive has been created."
+      description: selectedRiskIds.length > 0 
+        ? `New directive targeting ${selectedRiskIds.length} risk items`
+        : "New executive directive has been created."
     });
   };
 
@@ -145,6 +164,62 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  const getRelatedRiskCount = (item: ExecutiveFeedback) => {
+    if (!item.targetedRisks || item.targetedRisks.length === 0) {
+      return null;
+    }
+    
+    return (
+      <Badge 
+        variant="outline" 
+        className="bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1"
+      >
+        <LinkIcon className="h-3 w-3" />
+        {item.targetedRisks.length} {item.targetedRisks.length === 1 ? 'Risk' : 'Risks'}
+      </Badge>
+    );
+  };
+
+  const renderRelatedRisks = (riskIds: string[] | undefined) => {
+    if (!riskIds || riskIds.length === 0) {
+      return (
+        <div className="flex items-center gap-2 text-sm text-slate-500 italic mt-2">
+          <ShieldAlert className="h-4 w-4" />
+          No targeted risks defined
+        </div>
+      );
+    }
+
+    const relatedRisks = topRiskContributors.filter(risk => riskIds.includes(risk.id));
+    
+    return (
+      <div className="mt-3">
+        <p className="text-sm font-medium text-slate-700 mb-2">Targeted Risks:</p>
+        <div className="grid grid-cols-1 gap-2">
+          {relatedRisks.map(risk => (
+            <div key={risk.id} className="border border-slate-200 rounded p-2 bg-slate-50 text-sm">
+              <div className="flex justify-between items-center">
+                <p className="font-medium">{risk.id}: {risk.subsystem}</p>
+                <span 
+                  className={`text-xs px-1.5 py-0.5 rounded ${
+                    risk.severity === 'High' 
+                      ? 'bg-red-100 text-red-800' 
+                      : risk.severity === 'Medium'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-green-100 text-green-800'
+                  }`}
+                >
+                  {risk.severity}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">{risk.impact} Impact</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -206,6 +281,7 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
                     <div className="flex flex-wrap gap-2 mt-2">
                       {getCategoryBadge(item.category)}
                       {getStatusIcon(item.status)}
+                      {getRelatedRiskCount(item)}
                       <span className="text-xs text-slate-500">{formatDate(item.createdAt)}</span>
                       {item.assignee && (
                         <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
@@ -223,7 +299,11 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
                     {expandedId === item.id && (
                       <div className="mt-3 pt-3 border-t animate-in fade-in duration-200">
                         <p className="text-sm text-slate-600 mb-4">{item.description}</p>
-                        <div className="flex justify-end gap-2">
+                        
+                        {/* Display related risks when expanded */}
+                        {renderRelatedRisks(item.targetedRisks)}
+                        
+                        <div className="flex justify-end gap-2 mt-4">
                           {item.status !== "completed" && (
                             <>
                               {item.status === "new" && (
@@ -315,6 +395,106 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
                   <option value="notification">Notification</option>
                 </select>
               </div>
+            </div>
+            
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Target Specific Risks</label>
+                <Sheet open={risksSheetOpen} onOpenChange={setRisksSheetOpen}>
+                  <SheetTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                    >
+                      <LinkIcon className="h-3.5 w-3.5" />
+                      {selectedRiskIds.length > 0 
+                        ? `${selectedRiskIds.length} Selected` 
+                        : "Link Risks"}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Select Risks to Target</SheetTitle>
+                      <SheetDescription>
+                        Link this directive to specific risk contributors
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="py-4">
+                      <div className="space-y-4">
+                        {topRiskContributors.map((risk) => (
+                          <div key={risk.id} className="flex items-start space-x-3 border p-3 rounded-md">
+                            <Checkbox
+                              checked={selectedRiskIds.includes(risk.id)}
+                              onCheckedChange={(checked) => 
+                                handleRiskSelectionChange(risk.id, checked === true)
+                              }
+                              id={`risk-${risk.id}`}
+                            />
+                            <div className="grid gap-1.5">
+                              <label
+                                htmlFor={`risk-${risk.id}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {risk.id}: {risk.subsystem}
+                              </label>
+                              <div className="flex items-center space-x-2">
+                                <span 
+                                  className={`text-xs px-1.5 py-0.5 rounded ${
+                                    risk.severity === 'High' 
+                                      ? 'bg-red-100 text-red-800' 
+                                      : risk.severity === 'Medium'
+                                        ? 'bg-yellow-100 text-yellow-800'
+                                        : 'bg-green-100 text-green-800'
+                                  }`}
+                                >
+                                  {risk.severity}
+                                </span>
+                                <span className="text-xs text-gray-500">{risk.impact} Impact</span>
+                                {risk.trend === 'up' && (
+                                  <span className="flex items-center text-xs text-red-600">
+                                    <TrendingUp className="h-3 w-3 mr-0.5" /> Increasing
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 flex justify-end">
+                        <Button 
+                          onClick={() => setRisksSheetOpen(false)}
+                        >
+                          Done
+                        </Button>
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+              
+              {selectedRiskIds.length > 0 && (
+                <div className="flex flex-wrap gap-2 border rounded-md p-2 bg-slate-50">
+                  {selectedRiskIds.map((riskId) => {
+                    const risk = topRiskContributors.find(r => r.id === riskId);
+                    return (
+                      <Badge 
+                        key={riskId} 
+                        variant="outline" 
+                        className="bg-blue-50 text-blue-700 flex items-center gap-1"
+                      >
+                        {riskId}: {risk?.subsystem}
+                        <button 
+                          className="ml-1 hover:bg-blue-100 rounded-full"
+                          onClick={() => handleRiskSelectionChange(riskId, false)}
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

@@ -7,6 +7,7 @@ import { TopRiskContributors } from '@/components/dashboard/TopRiskContributors'
 import { RiskTrendOverTime } from '@/components/dashboard/RiskTrendOverTime';
 import { AIRecommendations } from '@/components/dashboard/AIRecommendations';
 import { ExecutiveFeedbackPanel } from '@/components/ExecutiveFeedbackPanel';
+import { ProgramRiskSummary } from '@/components/ProgramRiskSummary';
 import { 
   programStatus, 
   subsystemRiskData, 
@@ -15,8 +16,20 @@ import {
   aiSuggestions
 } from '@/data/mockDashboardData';
 import { executiveFeedback } from '@/data/mockFeedbackData';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DirectiveCoverage } from '@/components/dashboard/DirectiveCoverage';
 
 const ExecutiveDashboardPage = () => {
+  // Calculate the risk coverage metrics
+  const totalHighRisks = topRiskContributors.filter(risk => risk.severity === 'High').length;
+  const coveredHighRisks = topRiskContributors.filter(
+    risk => risk.severity === 'High' && risk.relatedDirectives && risk.relatedDirectives.length > 0
+  ).length;
+  
+  const coveragePercentage = totalHighRisks > 0 
+    ? Math.round((coveredHighRisks / totalHighRisks) * 100) 
+    : 0;
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <ExecutiveDashboardHeader />
@@ -25,25 +38,46 @@ const ExecutiveDashboardPage = () => {
         {/* Program Health Status Bar */}
         <ProgramHealthStatus status={programStatus} />
 
-        {/* Top Section - Executive Directives and Top Risk Contributors */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Executive Directives - Moved to the left */}
-          <ExecutiveFeedbackPanel feedback={executiveFeedback} />
+        {/* Top Section - Executive Directives and Risk Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Executive Directives - Left Column (2/3 width) */}
+          <div className="lg:col-span-2">
+            <ExecutiveFeedbackPanel feedback={executiveFeedback} />
+          </div>
           
-          {/* Top 5 Risk Contributors */}
+          {/* Risk Stats - Right Column (1/3 width) */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-medium">Directive Coverage</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DirectiveCoverage 
+                  totalHighRisks={totalHighRisks}
+                  coveredHighRisks={coveredHighRisks}
+                  coveragePercentage={coveragePercentage}
+                />
+              </CardContent>
+            </Card>
+            <ProgramRiskSummary />
+          </div>
+        </div>
+
+        {/* Middle Section - Top Risk Contributors */}
+        <div className="mb-6">
           <TopRiskContributors risks={topRiskContributors} />
         </div>
 
-        {/* Middle Section - Risk Breakdown and AI Strategic Recommendations */}
+        {/* Bottom Section - Risk Breakdown Charts and AI Recommendations */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Subsystem Risk Breakdown */}
           <SubsystemRiskBreakdown data={subsystemRiskData} />
 
-          {/* AI Strategic Recommendations - Moved to bottom right */}
+          {/* AI Strategic Recommendations */}
           <AIRecommendations suggestions={aiSuggestions} />
         </div>
 
-        {/* Bottom Section - Risk Over Time */}
+        {/* Risk Trend Over Time */}
         <RiskTrendOverTime data={riskTimeData} />
       </div>
     </div>

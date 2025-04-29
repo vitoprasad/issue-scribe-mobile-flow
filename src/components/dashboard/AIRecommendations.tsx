@@ -1,24 +1,12 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AISuggestion } from '@/types/dashboard';
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { 
-  Lightbulb, 
-  TrendingUp, 
-  ArrowRight, 
-  Link, 
-  Tag, 
-  BarChart3,
-  ArrowDown
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { formatCurrency } from '@/utils/formatters';
+import { Check, DollarSign, GraduationCap, Lightbulb, Plus, Rocket, ArrowDown } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { executiveFeedback } from '@/data/mockFeedbackData';
 
 interface AIRecommendationsProps {
   suggestions: AISuggestion[];
@@ -26,236 +14,209 @@ interface AIRecommendationsProps {
 
 export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestions }) => {
   const { toast } = useToast();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   
-  const handleImplement = (suggestion: AISuggestion) => {
+  const handleImplementation = (suggestion: AISuggestion) => {
     toast({
-      title: "Action Initiated",
-      description: `Implementing suggestion: ${suggestion.title}`,
-    });
-  };
-  
-  const handleDelegate = (suggestion: AISuggestion) => {
-    toast({
-      title: "Task Delegated",
-      description: `Suggestion assigned to appropriate team: ${suggestion.title}`,
+      title: "Implementation Scheduled",
+      description: `${suggestion.title} has been added to the implementation queue.`,
     });
   };
 
-  const handleViewImpact = (suggestion: AISuggestion) => {
-    toast({
-      title: "Impact Analysis",
-      description: `Viewing detailed impact analysis for: ${suggestion.title}`,
-    });
-  };
-
-  const toggleExpand = (id: string) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
-  const generateSuggestion = () => {
-    setLoading(true);
-    
-    // Simulate generating a new AI suggestion
-    setTimeout(() => {
-      toast({
-        title: "AI Analysis Complete",
-        description: "New strategic recommendations based on executive directives have been generated.",
-      });
-      setLoading(false);
-    }, 1500);
-  };
-  
-  const getImpactIndicator = (impact: string) => {
-    if (impact === 'high') {
-      return (
-        <div className="flex items-center gap-1.5">
-          <span className="bg-red-500 h-2 w-2 rounded-full"></span>
-          <span className="bg-red-500 h-3 w-2 rounded-full"></span>
-          <span className="bg-red-500 h-4 w-2 rounded-full"></span>
-        </div>
-      );
-    } else if (impact === 'medium') {
-      return (
-        <div className="flex items-center gap-1.5">
-          <span className="bg-yellow-500 h-2 w-2 rounded-full"></span>
-          <span className="bg-yellow-500 h-3 w-2 rounded-full"></span>
-          <span className="bg-gray-300 h-4 w-2 rounded-full"></span>
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex items-center gap-1.5">
-          <span className="bg-green-500 h-2 w-2 rounded-full"></span>
-          <span className="bg-gray-300 h-3 w-2 rounded-full"></span>
-          <span className="bg-gray-300 h-4 w-2 rounded-full"></span>
-        </div>
-      );
+  const getImpactColor = (impact: string) => {
+    switch (impact) {
+      case 'high':
+        return 'text-red-600';
+      case 'medium':
+        return 'text-amber-600';
+      case 'low':
+        return 'text-green-600';
+      default:
+        return 'text-slate-600';
     }
   };
-  
+
+  const getCategoryBadge = (category: string) => {
+    switch (category) {
+      case 'quality':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Quality</Badge>;
+      case 'cost':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Cost</Badge>;
+      case 'safety':
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Safety</Badge>;
+      case 'maintenance':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Maintenance</Badge>;
+      default:
+        return <Badge variant="outline">{category}</Badge>;
+    }
+  };
+
+  const getStatusBadge = (status: string | undefined) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700">Pending</Badge>;
+      case 'in-progress':
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700">In Progress</Badge>;
+      case 'completed':
+        return <Badge variant="outline" className="bg-green-50 text-green-700">Completed</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  const isAlignedWithDirectives = (suggestion: AISuggestion) => {
+    return suggestion.alignedWithDirectives === true;
+  };
+
+  const getRelatedDirectives = (suggestion: AISuggestion) => {
+    if (!suggestion.alignedWithDirectives) return [];
+    
+    // In a real app, you'd have a more robust way to determine which directives
+    // are related to which suggestions. Here we're just matching some by simulation.
+    const matchingDirectives = executiveFeedback.filter(directive => {
+      // Match based on subsystem or category
+      if (suggestion.title.toLowerCase().includes(directive.title.toLowerCase())) return true;
+      
+      // Match based on tags
+      if (directive.tags) {
+        for (const tag of directive.tags) {
+          if (suggestion.title.toLowerCase().includes(tag.toLowerCase())) return true;
+        }
+      }
+      
+      return false;
+    });
+    
+    return matchingDirectives;
+  };
+
+  const handleRequestSuggestion = () => {
+    toast({
+      title: "AI Processing",
+      description: "Generating new strategic recommendations based on current directives...",
+    });
+    
+    // In a real app, this would trigger an API call to generate new suggestions
+    setTimeout(() => {
+      toast({
+        title: "New Recommendations Ready",
+        description: "AI has generated 2 new strategic recommendations.",
+      });
+    }, 2000);
+  };
+
   return (
     <Card>
-      <CardHeader className="pb-2 flex flex-row items-center justify-between">
-        <div className="flex items-center">
-          <Lightbulb className="h-5 w-5 text-primary mr-2" />
-          <CardTitle className="text-lg font-medium">AI Strategic Recommendations</CardTitle>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-blue-600" />
+            <CardTitle className="text-lg font-medium">AI Strategic Recommendations</CardTitle>
+          </div>
+          <Button 
+            variant="outline" 
             size="sm"
-            variant="outline"
-            className="flex items-center text-primary"
-            onClick={generateSuggestion}
-            disabled={loading}
+            className="text-blue-600 flex gap-1 items-center"
+            onClick={handleRequestSuggestion}
           >
-            <Lightbulb className="h-4 w-4 mr-1" />
-            {loading ? "Analyzing..." : "AI Suggestion"}
+            <Lightbulb className="h-4 w-4" />
+            <span>Generate</span>
           </Button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="bg-primary/10 text-xs px-2 py-1 rounded-full text-primary font-medium flex items-center">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                Predictive
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-xs">Recommendations based on predictive analytics</p>
-            </TooltipContent>
-          </Tooltip>
         </div>
+        <p className="text-sm text-slate-500 mt-1">
+          Recommendations derived from executive directives and system analysis
+        </p>
       </CardHeader>
       <CardContent>
-        <div className="mb-3 p-2 bg-blue-50 rounded-md">
-          <div className="flex items-start">
-            <ArrowDown className="h-4 w-4 text-blue-600 mt-1 mr-2" />
-            <p className="text-sm text-blue-800">
-              Recommendations are derived from Executive Directives and system risk analysis. 
-              Implementing these suggestions aligns with leadership priorities.
-            </p>
-          </div>
-        </div>
-        <div className="space-y-3">
-          {suggestions.map((suggestion) => (
-            <div 
-              key={suggestion.id}
-              className="border rounded-lg p-3 hover:bg-slate-50 transition-colors"
-            >
+        <div className="space-y-4">
+          {suggestions.map((suggestion) => {
+            const relatedDirectives = getRelatedDirectives(suggestion);
+            const isAligned = isAlignedWithDirectives(suggestion);
+            
+            return (
               <div 
-                className="flex justify-between items-start cursor-pointer"
-                onClick={() => toggleExpand(suggestion.id)}
+                key={suggestion.id} 
+                className={`border rounded-lg p-4 ${
+                  isAligned 
+                    ? 'border-blue-200 bg-blue-50/30' 
+                    : 'border-slate-200'
+                }`}
               >
-                <div>
-                  <div className="flex items-center">
-                    <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
-                      suggestion.impact === 'high' ? 'bg-red-500' :
-                      suggestion.impact === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                    }`}></span>
-                    <h3 className="font-medium text-sm">{suggestion.title}</h3>
-                    
-                    {suggestion.alignedWithDirectives && (
-                      <div className="ml-2 bg-blue-100 text-blue-800 text-xs py-0.5 px-2 rounded-full flex items-center">
-                        <Tag className="h-3 w-3 mr-1" />
-                        <span>Executive Priority</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 inline-block">
-                      {suggestion.category.charAt(0).toUpperCase() + suggestion.category.slice(1)}
-                    </span>
-                    
-                    {suggestion.estimatedSavings && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-green-50 text-green-700 inline-block">
-                        Savings: {formatCurrency(suggestion.estimatedSavings)}
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium">{suggestion.title}</h3>
+                  <div className="flex items-center gap-2">
+                    {suggestion.impact && (
+                      <span className={`text-xs font-medium ${getImpactColor(suggestion.impact)}`}>
+                        {suggestion.impact.charAt(0).toUpperCase() + suggestion.impact.slice(1)} Impact
                       </span>
                     )}
-                    
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-slate-500">Impact:</span>
-                      {getImpactIndicator(suggestion.impact)}
-                    </div>
+                    {getCategoryBadge(suggestion.category)}
+                    {getStatusBadge(suggestion.implementationStatus)}
                   </div>
                 </div>
-                <ArrowRight size={16} className={`transition-transform duration-200 ${expandedId === suggestion.id ? 'rotate-90' : ''}`} />
-              </div>
-              
-              {expandedId === suggestion.id && (
-                <div className="mt-3 animate-fade-in">
-                  <p className="text-sm text-gray-600 mb-3">{suggestion.description}</p>
-                  
-                  {suggestion.relatedIssues && (
-                    <div className="bg-slate-50 p-2 rounded-md mb-3">
-                      <h4 className="text-xs font-medium text-slate-500 mb-1 flex items-center">
-                        <Link className="h-3 w-3 mr-1" />
-                        Related Issues
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {suggestion.relatedIssues.map((issue, idx) => (
-                          <div key={idx} className="text-xs px-2 py-0.5 bg-white border border-slate-200 rounded flex items-center">
-                            {issue}
+                <p className="text-sm text-slate-600 mb-3">{suggestion.description}</p>
+                
+                {/* Alignment with directives */}
+                {isAligned && (
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex items-center gap-1 mb-2 text-xs text-blue-700">
+                      <ArrowDown className="h-3.5 w-3.5" />
+                      <span className="font-medium">Aligned with Executive Directives</span>
+                    </div>
+                    
+                    {relatedDirectives.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-1.5">
+                        {relatedDirectives.map((directive) => (
+                          <div key={directive.id} className="text-xs bg-blue-50 border border-blue-100 rounded p-1.5 flex justify-between">
+                            <span className="font-medium">{directive.title}</span>
+                            <Badge variant="outline" className="text-[10px] bg-blue-100">
+                              {directive.id}
+                            </Badge>
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
-                  
-                  {suggestion.alignedWithDirectives && (
-                    <div className="bg-blue-50 p-2 rounded-md mb-3">
-                      <h4 className="text-xs font-medium text-blue-700 mb-1 flex items-center">
-                        <ArrowDown className="h-3 w-3 mr-1" />
-                        Executive Alignment
-                      </h4>
-                      <p className="text-xs text-blue-600">This recommendation directly supports executive priorities and directives.</p>
-                    </div>
-                  )}
-                  
-                  {suggestion.impact === 'high' && (
-                    <div className="bg-red-50 p-2 rounded-md mb-3">
-                      <h4 className="text-xs font-medium text-red-700 mb-1 flex items-center">
-                        <BarChart3 className="h-3 w-3 mr-1" />
-                        Impact Analysis
-                      </h4>
-                      <p className="text-xs text-red-600">This issue affects multiple systems and requires immediate attention to mitigate risk.</p>
-                    </div>
-                  )}
-                  
-                  <div className="flex space-x-2 justify-end">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleViewImpact(suggestion)}
-                    >
-                      <BarChart3 className="h-3 w-3 mr-1" />
-                      Impact
-                    </Button>
-                    
-                    {suggestion.actionable && (
-                      <>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleDelegate(suggestion)}
-                        >
-                          Delegate
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleImplement(suggestion)}
-                        >
-                          Implement
-                        </Button>
-                      </>
-                    )}
-                    {!suggestion.actionable && (
-                      <span className="text-xs text-muted-foreground self-center">Monitoring required</span>
+                    ) : (
+                      <div className="text-xs text-slate-500 italic">
+                        Generally aligned with executive priorities
+                      </div>
                     )}
                   </div>
+                )}
+                
+                {/* Actionable items */}
+                <div className="flex justify-between items-center mt-3">
+                  <div className="flex items-center gap-1">
+                    {suggestion.estimatedSavings && (
+                      <div className="flex items-center text-sm text-green-600 font-medium">
+                        <DollarSign className="h-3.5 w-3.5 mr-0.5" />
+                        {suggestion.estimatedSavings.toLocaleString()} est. savings
+                      </div>
+                    )}
+                  </div>
+                  
+                  {suggestion.actionable && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                      onClick={() => handleImplementation(suggestion)}
+                    >
+                      <Rocket className="h-3.5 w-3.5 mr-1.5" />
+                      Implement
+                    </Button>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
+          
+          <Button
+            variant="outline"
+            className="w-full border-dashed text-slate-600 hover:text-blue-600"
+            onClick={handleRequestSuggestion}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Request More Recommendations
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -7,6 +7,7 @@ export interface RiskItem {
   severity: string;
   impact: string;
   trend: string;
+  relatedDirectives?: string[]; // IDs of related executive directives
 }
 
 export interface SubsystemRisk {
@@ -46,6 +47,7 @@ export interface ExecutiveFeedback {
   status: "new" | "in-progress" | "completed";
   assignee?: string;
   tags?: string[];
+  targetedRisks?: string[]; // IDs of risk items this directive addresses
 }
 
 export const chartConfig = {

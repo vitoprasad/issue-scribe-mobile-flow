@@ -13,11 +13,11 @@ export const subsystemRiskData: SubsystemRisk[] = [
 ];
 
 export const topRiskContributors: RiskItem[] = [
-  { id: 'R-001', subsystem: 'Power', severity: 'High', impact: 'Critical', trend: 'up' },
-  { id: 'R-023', subsystem: 'Propulsion', severity: 'High', impact: 'High', trend: 'up' },
-  { id: 'R-015', subsystem: 'Avionics', severity: 'Medium', impact: 'High', trend: 'stable' },
+  { id: 'R-001', subsystem: 'Power', severity: 'High', impact: 'Critical', trend: 'up', relatedDirectives: ['EF-001', 'EF-002'] },
+  { id: 'R-023', subsystem: 'Propulsion', severity: 'High', impact: 'High', trend: 'up', relatedDirectives: ['EF-001'] },
+  { id: 'R-015', subsystem: 'Avionics', severity: 'Medium', impact: 'High', trend: 'stable', relatedDirectives: ['EF-003'] },
   { id: 'R-034', subsystem: 'Structure', severity: 'High', impact: 'Medium', trend: 'down' },
-  { id: 'R-009', subsystem: 'Thermal', severity: 'Medium', impact: 'Medium', trend: 'up' },
+  { id: 'R-009', subsystem: 'Thermal', severity: 'Medium', impact: 'Medium', trend: 'up', relatedDirectives: ['EF-004'] },
 ];
 
 export const riskTimeData: RiskTimeData[] = [
