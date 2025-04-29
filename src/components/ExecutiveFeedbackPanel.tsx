@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +14,7 @@ import {
   Plus,
   LinkIcon,
   ShieldAlert,
-  TrendingUp  // Added missing import
+  TrendingUp
 } from 'lucide-react';
 import { ExecutiveFeedback } from '@/types/dashboard';
 import { useToast } from "@/hooks/use-toast";
@@ -29,9 +28,13 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 
 interface ExecutiveFeedbackPanelProps {
   feedback: ExecutiveFeedback[];
+  readOnly?: boolean; // New prop to control edit capabilities
 }
 
-export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ feedback }) => {
+export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
+  feedback,
+  readOnly = false // Default to false for backward compatibility
+}) => {
   const { toast } = useToast();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeFeedback, setActiveFeedback] = useState<ExecutiveFeedback[]>(feedback);
@@ -230,18 +233,28 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ArrowDown className="h-5 w-5 text-blue-600" />
-              <CardTitle className="text-lg font-medium">Executive Directives</CardTitle>
+              <div>
+                <CardTitle className="text-lg font-medium">Executive Directives</CardTitle>
+                {readOnly && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Directives flow down from executive leadership
+                  </p>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setDialogOpen(true)}
-                className="text-blue-600 flex items-center"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Directive
-              </Button>
+              {/* Only show Add Directive button when not in readOnly mode */}
+              {!readOnly && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDialogOpen(true)}
+                  className="text-blue-600 flex items-center"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Directive
+                </Button>
+              )}
               <Badge variant="outline" className="bg-blue-50 text-blue-600">
                 {activeFeedback.length} Items
               </Badge>
@@ -295,6 +308,12 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
                           {tag}
                         </div>
                       ))}
+                      {/* Badge indicating this is from Executive leadership when in readOnly mode */}
+                      {readOnly && (
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                          From Executive
+                        </Badge>
+                      )}
                     </div>
                     
                     {expandedId === item.id && (
@@ -305,6 +324,8 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
                         {renderRelatedRisks(item.targetedRisks)}
                         
                         <div className="flex justify-end gap-2 mt-4">
+                          {/* Status update buttons remain available even in readOnly mode
+                              as managers should still be able to mark progress */}
                           {item.status !== "completed" && (
                             <>
                               {item.status === "new" && (
@@ -342,168 +363,170 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
         )}
       </Card>
 
-      {/* Add New Directive Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Add New Executive Directive</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <label htmlFor="title" className="text-sm font-medium">Title</label>
-              <Input
-                id="title"
-                value={newDirective.title}
-                onChange={(e) => setNewDirective({...newDirective, title: e.target.value})}
-                placeholder="Enter directive title"
-              />
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="description" className="text-sm font-medium">Description</label>
-              <Textarea
-                id="description"
-                value={newDirective.description}
-                onChange={(e) => setNewDirective({...newDirective, description: e.target.value})}
-                placeholder="Provide detailed instructions"
-                rows={4}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+      {/* Add New Directive Dialog - Only render if not in readOnly mode */}
+      {!readOnly && (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Add New Executive Directive</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <label htmlFor="priority" className="text-sm font-medium">Priority</label>
-                <select
-                  id="priority"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  value={newDirective.priority}
-                  onChange={(e) => setNewDirective({...newDirective, priority: e.target.value})}
-                >
-                  <option value="critical">Critical</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
+                <label htmlFor="title" className="text-sm font-medium">Title</label>
+                <Input
+                  id="title"
+                  value={newDirective.title}
+                  onChange={(e) => setNewDirective({...newDirective, title: e.target.value})}
+                  placeholder="Enter directive title"
+                />
               </div>
               <div className="grid gap-2">
-                <label htmlFor="category" className="text-sm font-medium">Category</label>
-                <select
-                  id="category"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  value={newDirective.category}
-                  onChange={(e) => setNewDirective({...newDirective, category: e.target.value})}
-                >
-                  <option value="directive">Directive</option>
-                  <option value="inquiry">Inquiry</option>
-                  <option value="notification">Notification</option>
-                </select>
+                <label htmlFor="description" className="text-sm font-medium">Description</label>
+                <Textarea
+                  id="description"
+                  value={newDirective.description}
+                  onChange={(e) => setNewDirective({...newDirective, description: e.target.value})}
+                  placeholder="Provide detailed instructions"
+                  rows={4}
+                />
               </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Target Specific Risks</label>
-                <Sheet open={risksSheetOpen} onOpenChange={setRisksSheetOpen}>
-                  <SheetTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex items-center gap-1"
-                    >
-                      <LinkIcon className="h-3.5 w-3.5" />
-                      {selectedRiskIds.length > 0 
-                        ? `${selectedRiskIds.length} Selected` 
-                        : "Link Risks"}
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Select Risks to Target</SheetTitle>
-                      <SheetDescription>
-                        Link this directive to specific risk contributors
-                      </SheetDescription>
-                    </SheetHeader>
-                    <div className="py-4">
-                      <div className="space-y-4">
-                        {topRiskContributors.map((risk) => (
-                          <div key={risk.id} className="flex items-start space-x-3 border p-3 rounded-md">
-                            <Checkbox
-                              checked={selectedRiskIds.includes(risk.id)}
-                              onCheckedChange={(checked) => 
-                                handleRiskSelectionChange(risk.id, checked === true)
-                              }
-                              id={`risk-${risk.id}`}
-                            />
-                            <div className="grid gap-1.5">
-                              <label
-                                htmlFor={`risk-${risk.id}`}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {risk.id}: {risk.subsystem}
-                              </label>
-                              <div className="flex items-center space-x-2">
-                                <span 
-                                  className={`text-xs px-1.5 py-0.5 rounded ${
-                                    risk.severity === 'High' 
-                                      ? 'bg-red-100 text-red-800' 
-                                      : risk.severity === 'Medium'
-                                        ? 'bg-yellow-100 text-yellow-800'
-                                        : 'bg-green-100 text-green-800'
-                                  }`}
-                                >
-                                  {risk.severity}
-                                </span>
-                                <span className="text-xs text-gray-500">{risk.impact} Impact</span>
-                                {risk.trend === 'up' && (
-                                  <span className="flex items-center text-xs text-red-600">
-                                    <TrendingUp className="h-3 w-3 mr-0.5" /> Increasing
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-4 flex justify-end">
-                        <Button 
-                          onClick={() => setRisksSheetOpen(false)}
-                        >
-                          Done
-                        </Button>
-                      </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <label htmlFor="priority" className="text-sm font-medium">Priority</label>
+                  <select
+                    id="priority"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={newDirective.priority}
+                    onChange={(e) => setNewDirective({...newDirective, priority: e.target.value})}
+                  >
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="category" className="text-sm font-medium">Category</label>
+                  <select
+                    id="category"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={newDirective.category}
+                    onChange={(e) => setNewDirective({...newDirective, category: e.target.value})}
+                  >
+                    <option value="directive">Directive</option>
+                    <option value="inquiry">Inquiry</option>
+                    <option value="notification">Notification</option>
+                  </select>
+                </div>
               </div>
               
-              {selectedRiskIds.length > 0 && (
-                <div className="flex flex-wrap gap-2 border rounded-md p-2 bg-slate-50">
-                  {selectedRiskIds.map((riskId) => {
-                    const risk = topRiskContributors.find(r => r.id === riskId);
-                    return (
-                      <Badge 
-                        key={riskId} 
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Target Specific Risks</label>
+                  <Sheet open={risksSheetOpen} onOpenChange={setRisksSheetOpen}>
+                    <SheetTrigger asChild>
+                      <Button 
                         variant="outline" 
-                        className="bg-blue-50 text-blue-700 flex items-center gap-1"
+                        size="sm" 
+                        className="flex items-center gap-1"
                       >
-                        {riskId}: {risk?.subsystem}
-                        <button 
-                          className="ml-1 hover:bg-blue-100 rounded-full"
-                          onClick={() => handleRiskSelectionChange(riskId, false)}
-                        >
-                          ×
-                        </button>
-                      </Badge>
-                    );
-                  })}
+                        <LinkIcon className="h-3.5 w-3.5" />
+                        {selectedRiskIds.length > 0 
+                          ? `${selectedRiskIds.length} Selected` 
+                          : "Link Risks"}
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                      <SheetHeader>
+                        <SheetTitle>Select Risks to Target</SheetTitle>
+                        <SheetDescription>
+                          Link this directive to specific risk contributors
+                        </SheetDescription>
+                      </SheetHeader>
+                      <div className="py-4">
+                        <div className="space-y-4">
+                          {topRiskContributors.map((risk) => (
+                            <div key={risk.id} className="flex items-start space-x-3 border p-3 rounded-md">
+                              <Checkbox
+                                checked={selectedRiskIds.includes(risk.id)}
+                                onCheckedChange={(checked) => 
+                                  handleRiskSelectionChange(risk.id, checked === true)
+                                }
+                                id={`risk-${risk.id}`}
+                              />
+                              <div className="grid gap-1.5">
+                                <label
+                                  htmlFor={`risk-${risk.id}`}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                >
+                                  {risk.id}: {risk.subsystem}
+                                </label>
+                                <div className="flex items-center space-x-2">
+                                  <span 
+                                    className={`text-xs px-1.5 py-0.5 rounded ${
+                                      risk.severity === 'High' 
+                                        ? 'bg-red-100 text-red-800' 
+                                        : risk.severity === 'Medium'
+                                          ? 'bg-yellow-100 text-yellow-800'
+                                          : 'bg-green-100 text-green-800'
+                                    }`}
+                                  >
+                                    {risk.severity}
+                                  </span>
+                                  <span className="text-xs text-gray-500">{risk.impact} Impact</span>
+                                  {risk.trend === 'up' && (
+                                    <span className="flex items-center text-xs text-red-600">
+                                      <TrendingUp className="h-3 w-3 mr-0.5" /> Increasing
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-4 flex justify-end">
+                          <Button 
+                            onClick={() => setRisksSheetOpen(false)}
+                          >
+                            Done
+                          </Button>
+                        </div>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
                 </div>
-              )}
+                
+                {selectedRiskIds.length > 0 && (
+                  <div className="flex flex-wrap gap-2 border rounded-md p-2 bg-slate-50">
+                    {selectedRiskIds.map((riskId) => {
+                      const risk = topRiskContributors.find(r => r.id === riskId);
+                      return (
+                        <Badge 
+                          key={riskId} 
+                          variant="outline" 
+                          className="bg-blue-50 text-blue-700 flex items-center gap-1"
+                        >
+                          {riskId}: {risk?.subsystem}
+                          <button 
+                            className="ml-1 hover:bg-blue-100 rounded-full"
+                            onClick={() => handleRiskSelectionChange(riskId, false)}
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleAddDirective}>Create Directive</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleAddDirective}>Create Directive</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

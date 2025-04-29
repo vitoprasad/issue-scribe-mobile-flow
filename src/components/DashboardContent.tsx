@@ -15,9 +15,12 @@ export const DashboardContent = () => {
     <SidebarInset className="p-6 overflow-auto">
       <ManagerDashboardHeader />
       
-      {/* Executive Feedback Panel - now minimizable */}
+      {/* Executive Feedback Panel - now in readOnly mode */}
       <div className="mb-6">
-        <ExecutiveFeedbackPanel feedback={executiveFeedback} />
+        <ExecutiveFeedbackPanel 
+          feedback={executiveFeedback} 
+          readOnly={true} // Enable readOnly mode for Manager Dashboard
+        />
       </div>
       
       {/* AI Strategic Recommendations */}
