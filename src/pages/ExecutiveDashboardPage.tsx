@@ -68,17 +68,22 @@ const ExecutiveDashboardPage = () => {
           <TopRiskContributors risks={topRiskContributors} />
         </div>
 
-        {/* Bottom Section - Risk Breakdown Charts and AI Recommendations */}
+        {/* Bottom Section - Restructured to put RiskTrendOverTime under SubsystemRiskBreakdown */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Subsystem Risk Breakdown */}
-          <SubsystemRiskBreakdown data={subsystemRiskData} />
-
-          {/* AI Strategic Recommendations */}
-          <AIRecommendations suggestions={aiSuggestions} />
+          {/* Left column */}
+          <div className="space-y-6">
+            {/* Subsystem Risk Breakdown */}
+            <SubsystemRiskBreakdown data={subsystemRiskData} />
+            
+            {/* Risk Trend Over Time - Now placed directly under SubsystemRiskBreakdown */}
+            <RiskTrendOverTime data={riskTimeData} />
+          </div>
+          
+          {/* Right column - AI Strategic Recommendations */}
+          <div>
+            <AIRecommendations suggestions={aiSuggestions} />
+          </div>
         </div>
-
-        {/* Risk Trend Over Time */}
-        <RiskTrendOverTime data={riskTimeData} />
       </div>
     </div>
   );
