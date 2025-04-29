@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AISuggestion } from '@/types/dashboard';
-import { Check, DollarSign, GraduationCap, Lightbulb, Plus, Rocket, ArrowDown, ChevronDown, Minimize } from 'lucide-react';
+import { Check, DollarSign, GraduationCap, Lightbulb, Plus, Rocket, ArrowDown, ChevronDown, Minimize, Link } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { executiveFeedback } from '@/data/mockFeedbackData';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AIRecommendationsProps {
   suggestions: AISuggestion[];
@@ -22,6 +23,16 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
       title: "Implementation Scheduled",
       description: `${suggestion.title} has been added to the implementation queue.`,
     });
+  };
+
+  const handleClusterClick = (clusterId: string) => {
+    toast({
+      title: "Navigating to Cluster",
+      description: `Viewing details for cluster ${clusterId}`,
+    });
+    
+    // In a real app, this would navigate to the cluster details page
+    console.log(`Navigate to cluster: ${clusterId}`);
   };
 
   const getImpactColor = (impact: string) => {
@@ -177,6 +188,37 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
                       </div>
                     </div>
                     <p className="text-sm text-slate-600 mb-3">{suggestion.description}</p>
+                    
+                    {/* Related Clusters/Issues Section */}
+                    {suggestion.relatedIssues && suggestion.relatedIssues.length > 0 && (
+                      <div className="border-t pt-2 mt-2">
+                        <div className="flex items-center gap-1 mb-2 text-xs text-slate-700">
+                          <Link className="h-3.5 w-3.5" />
+                          <span className="font-medium">Related Issue Clusters</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          <TooltipProvider>
+                            {suggestion.relatedIssues.map((issueId) => (
+                              <Tooltip key={issueId}>
+                                <TooltipTrigger asChild>
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
+                                    onClick={() => handleClusterClick(issueId)}
+                                  >
+                                    <Link className="h-3 w-3 mr-1" />
+                                    {issueId}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">View details for cluster {issueId}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            ))}
+                          </TooltipProvider>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Alignment with directives */}
                     {isAligned && (
