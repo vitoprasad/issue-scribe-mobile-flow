@@ -3,9 +3,23 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowDown, MessageSquare, ArrowUp, CheckCircle, Minimize, ChevronDown, ChevronUp, Tag } from 'lucide-react';
+import { 
+  ArrowDown, 
+  MessageSquare, 
+  ArrowUp, 
+  CheckCircle, 
+  Minimize, 
+  ChevronDown, 
+  ChevronUp, 
+  Tag,
+  Plus
+} from 'lucide-react';
 import { ExecutiveFeedback } from '@/types/dashboard';
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 
 interface ExecutiveFeedbackPanelProps {
   feedback: ExecutiveFeedback[];
@@ -16,6 +30,13 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeFeedback, setActiveFeedback] = useState<ExecutiveFeedback[]>(feedback);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [newDirective, setNewDirective] = useState({
+    title: '',
+    description: '',
+    priority: 'medium',
+    category: 'directive',
+  });
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -35,6 +56,43 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
 
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
+  };
+
+  const handleAddDirective = () => {
+    if (!newDirective.title.trim() || !newDirective.description.trim()) {
+      toast({
+        title: "Required Fields Missing",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newId = `EF-${String(activeFeedback.length + 1).padStart(3, '0')}`;
+    
+    const directive: ExecutiveFeedback = {
+      id: newId,
+      title: newDirective.title,
+      description: newDirective.description,
+      priority: newDirective.priority as "critical" | "high" | "medium" | "low",
+      category: newDirective.category as "directive" | "inquiry" | "notification",
+      createdAt: new Date().toISOString(),
+      status: "new",
+    };
+
+    setActiveFeedback([...activeFeedback, directive]);
+    setDialogOpen(false);
+    setNewDirective({
+      title: '',
+      description: '',
+      priority: 'medium',
+      category: 'directive',
+    });
+
+    toast({
+      title: "Directive Added",
+      description: "New executive directive has been created."
+    });
   };
 
   const getPriorityBadge = (priority: string) => {
@@ -90,107 +148,181 @@ export const ExecutiveFeedbackPanel: React.FC<ExecutiveFeedbackPanelProps> = ({ 
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ArrowDown className="h-5 w-5 text-blue-600" />
-            <CardTitle className="text-lg font-medium">Executive Directives</CardTitle>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-blue-50 text-blue-600">
-              {feedback.length} Items
-            </Badge>
-            <Button
-              variant="ghost" 
-              size="sm"
-              onClick={toggleMinimize}
-              className="p-1 h-8 w-8"
-            >
-              {isMinimized ? <ChevronDown className="h-4 w-4" /> : <Minimize className="h-4 w-4" />}
-              <span className="sr-only">{isMinimized ? 'Expand' : 'Minimize'}</span>
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      {!isMinimized && (
-        <CardContent>
-          <div className="space-y-4">
-            {activeFeedback.map((item) => (
-              <div 
-                key={item.id}
-                className="border rounded-lg overflow-hidden hover:shadow-sm transition-shadow"
+    <>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ArrowDown className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-lg font-medium">Executive Directives</CardTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDialogOpen(true)}
+                className="text-blue-600 flex items-center"
               >
-                <div className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-slate-500" />
-                      <h3 
-                        className="font-medium cursor-pointer hover:text-blue-600 transition-colors"
-                        onClick={() => toggleExpand(item.id)}
-                      >
-                        {item.title}
-                      </h3>
-                    </div>
-                    {getPriorityBadge(item.priority)}
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {getCategoryBadge(item.category)}
-                    {getStatusIcon(item.status)}
-                    <span className="text-xs text-slate-500">{formatDate(item.createdAt)}</span>
-                    {item.assignee && (
-                      <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
-                        Assignee: {item.assignee}
-                      </span>
-                    )}
-                    {item.tags && item.tags.map((tag, idx) => (
-                      <div key={idx} className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs">
-                        <Tag className="h-3 w-3" />
-                        {tag}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {expandedId === item.id && (
-                    <div className="mt-3 pt-3 border-t animate-in fade-in duration-200">
-                      <p className="text-sm text-slate-600 mb-4">{item.description}</p>
-                      <div className="flex justify-end gap-2">
-                        {item.status !== "completed" && (
-                          <>
-                            {item.status === "new" && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="text-blue-600"
-                                onClick={() => handleStatusUpdate(item.id, "in-progress")}
-                              >
-                                <ArrowUp className="h-4 w-4 mr-1" />
-                                Start Working
-                              </Button>
-                            )}
-                            {item.status === "in-progress" && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="text-green-600"
-                                onClick={() => handleStatusUpdate(item.id, "completed")}
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Mark Complete
-                              </Button>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+                <Plus className="h-4 w-4 mr-1" />
+                Add Directive
+              </Button>
+              <Badge variant="outline" className="bg-blue-50 text-blue-600">
+                {activeFeedback.length} Items
+              </Badge>
+              <Button
+                variant="ghost" 
+                size="sm"
+                onClick={toggleMinimize}
+                className="p-1 h-8 w-8"
+              >
+                {isMinimized ? <ChevronDown className="h-4 w-4" /> : <Minimize className="h-4 w-4" />}
+                <span className="sr-only">{isMinimized ? 'Expand' : 'Minimize'}</span>
+              </Button>
+            </div>
           </div>
-        </CardContent>
-      )}
-    </Card>
+        </CardHeader>
+        {!isMinimized && (
+          <CardContent>
+            <div className="space-y-4">
+              {activeFeedback.map((item) => (
+                <div 
+                  key={item.id}
+                  className="border rounded-lg overflow-hidden hover:shadow-sm transition-shadow"
+                >
+                  <div className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4 text-slate-500" />
+                        <h3 
+                          className="font-medium cursor-pointer hover:text-blue-600 transition-colors"
+                          onClick={() => toggleExpand(item.id)}
+                        >
+                          {item.title}
+                        </h3>
+                      </div>
+                      {getPriorityBadge(item.priority)}
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {getCategoryBadge(item.category)}
+                      {getStatusIcon(item.status)}
+                      <span className="text-xs text-slate-500">{formatDate(item.createdAt)}</span>
+                      {item.assignee && (
+                        <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
+                          Assignee: {item.assignee}
+                        </span>
+                      )}
+                      {item.tags && item.tags.map((tag, idx) => (
+                        <div key={idx} className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs">
+                          <Tag className="h-3 w-3" />
+                          {tag}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {expandedId === item.id && (
+                      <div className="mt-3 pt-3 border-t animate-in fade-in duration-200">
+                        <p className="text-sm text-slate-600 mb-4">{item.description}</p>
+                        <div className="flex justify-end gap-2">
+                          {item.status !== "completed" && (
+                            <>
+                              {item.status === "new" && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  className="text-blue-600"
+                                  onClick={() => handleStatusUpdate(item.id, "in-progress")}
+                                >
+                                  <ArrowUp className="h-4 w-4 mr-1" />
+                                  Start Working
+                                </Button>
+                              )}
+                              {item.status === "in-progress" && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  className="text-green-600"
+                                  onClick={() => handleStatusUpdate(item.id, "completed")}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Mark Complete
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
+      {/* Add New Directive Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add New Executive Directive</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label htmlFor="title" className="text-sm font-medium">Title</label>
+              <Input
+                id="title"
+                value={newDirective.title}
+                onChange={(e) => setNewDirective({...newDirective, title: e.target.value})}
+                placeholder="Enter directive title"
+              />
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="description" className="text-sm font-medium">Description</label>
+              <Textarea
+                id="description"
+                value={newDirective.description}
+                onChange={(e) => setNewDirective({...newDirective, description: e.target.value})}
+                placeholder="Provide detailed instructions"
+                rows={4}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <label htmlFor="priority" className="text-sm font-medium">Priority</label>
+                <select
+                  id="priority"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={newDirective.priority}
+                  onChange={(e) => setNewDirective({...newDirective, priority: e.target.value})}
+                >
+                  <option value="critical">Critical</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="category" className="text-sm font-medium">Category</label>
+                <select
+                  id="category"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={newDirective.category}
+                  onChange={(e) => setNewDirective({...newDirective, category: e.target.value})}
+                >
+                  <option value="directive">Directive</option>
+                  <option value="inquiry">Inquiry</option>
+                  <option value="notification">Notification</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddDirective}>Create Directive</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

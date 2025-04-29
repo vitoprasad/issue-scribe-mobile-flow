@@ -25,22 +25,22 @@ const ExecutiveDashboardPage = () => {
         {/* Program Health Status Bar */}
         <ProgramHealthStatus status={programStatus} />
 
-        {/* Top Section - AI Recommendations and Executive Directives */}
+        {/* Top Section - Executive Directives and Top Risk Contributors */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* AI Recommendations */}
-          <AIRecommendations suggestions={aiSuggestions} />
-          
-          {/* Executive Directives */}
+          {/* Executive Directives - Moved to the left */}
           <ExecutiveFeedbackPanel feedback={executiveFeedback} />
+          
+          {/* Top 5 Risk Contributors */}
+          <TopRiskContributors risks={topRiskContributors} />
         </div>
 
-        {/* Middle Section - Risk Breakdown and Top Contributors */}
+        {/* Middle Section - Risk Breakdown and AI Strategic Recommendations */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Subsystem Risk Breakdown */}
           <SubsystemRiskBreakdown data={subsystemRiskData} />
 
-          {/* Top 5 Risk Contributors */}
-          <TopRiskContributors risks={topRiskContributors} />
+          {/* AI Strategic Recommendations - Moved to bottom right */}
+          <AIRecommendations suggestions={aiSuggestions} />
         </div>
 
         {/* Bottom Section - Risk Over Time */}

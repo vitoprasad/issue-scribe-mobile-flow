@@ -8,7 +8,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Lightbulb, TrendingUp, ArrowRight, Link, Tag, BarChart3 } from 'lucide-react';
+import { 
+  Lightbulb, 
+  TrendingUp, 
+  ArrowRight, 
+  Link, 
+  Tag, 
+  BarChart3,
+  ArrowDown
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency } from '@/utils/formatters';
 
@@ -19,6 +27,7 @@ interface AIRecommendationsProps {
 export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestions }) => {
   const { toast } = useToast();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   
   const handleImplement = (suggestion: AISuggestion) => {
     toast({
@@ -45,11 +54,17 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
     setExpandedId(expandedId === id ? null : id);
   };
 
-  // Function to determine if the suggestion aligns with executive directives
-  const getDirectiveAlignment = (category: string) => {
-    // This would ideally check against actual directives from executiveFeedback data
-    const highPriorityDirectives = ['cost', 'safety', 'quality'];
-    return highPriorityDirectives.includes(category);
+  const generateSuggestion = () => {
+    setLoading(true);
+    
+    // Simulate generating a new AI suggestion
+    setTimeout(() => {
+      toast({
+        title: "AI Analysis Complete",
+        description: "New strategic recommendations based on executive directives have been generated.",
+      });
+      setLoading(false);
+    }, 1500);
   };
   
   const getImpactIndicator = (impact: string) => {
@@ -87,19 +102,40 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
           <Lightbulb className="h-5 w-5 text-primary mr-2" />
           <CardTitle className="text-lg font-medium">AI Strategic Recommendations</CardTitle>
         </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="bg-primary/10 text-xs px-2 py-1 rounded-full text-primary font-medium flex items-center">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              Predictive
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="text-xs">Recommendations based on predictive analytics</p>
-          </TooltipContent>
-        </Tooltip>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex items-center text-primary"
+            onClick={generateSuggestion}
+            disabled={loading}
+          >
+            <Lightbulb className="h-4 w-4 mr-1" />
+            {loading ? "Analyzing..." : "AI Suggestion"}
+          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="bg-primary/10 text-xs px-2 py-1 rounded-full text-primary font-medium flex items-center">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                Predictive
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Recommendations based on predictive analytics</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </CardHeader>
       <CardContent>
+        <div className="mb-3 p-2 bg-blue-50 rounded-md">
+          <div className="flex items-start">
+            <ArrowDown className="h-4 w-4 text-blue-600 mt-1 mr-2" />
+            <p className="text-sm text-blue-800">
+              Recommendations are derived from Executive Directives and system risk analysis. 
+              Implementing these suggestions aligns with leadership priorities.
+            </p>
+          </div>
+        </div>
         <div className="space-y-3">
           {suggestions.map((suggestion) => (
             <div 
@@ -118,7 +154,7 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
                     }`}></span>
                     <h3 className="font-medium text-sm">{suggestion.title}</h3>
                     
-                    {getDirectiveAlignment(suggestion.category) && (
+                    {suggestion.alignedWithDirectives && (
                       <div className="ml-2 bg-blue-100 text-blue-800 text-xs py-0.5 px-2 rounded-full flex items-center">
                         <Tag className="h-3 w-3 mr-1" />
                         <span>Executive Priority</span>
@@ -162,6 +198,16 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ suggestion
                           </div>
                         ))}
                       </div>
+                    </div>
+                  )}
+                  
+                  {suggestion.alignedWithDirectives && (
+                    <div className="bg-blue-50 p-2 rounded-md mb-3">
+                      <h4 className="text-xs font-medium text-blue-700 mb-1 flex items-center">
+                        <ArrowDown className="h-3 w-3 mr-1" />
+                        Executive Alignment
+                      </h4>
+                      <p className="text-xs text-blue-600">This recommendation directly supports executive priorities and directives.</p>
                     </div>
                   )}
                   

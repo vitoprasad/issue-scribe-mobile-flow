@@ -1,3 +1,4 @@
+
 export type ProgramStatus = "red" | "yellow" | "green";
 
 export interface RiskItem {
@@ -32,6 +33,7 @@ export interface AISuggestion {
   estimatedSavings?: number;
   relatedIssues?: string[];
   implementationStatus?: 'pending' | 'in-progress' | 'completed';
+  alignedWithDirectives?: boolean;
 }
 
 export interface ExecutiveFeedback {
