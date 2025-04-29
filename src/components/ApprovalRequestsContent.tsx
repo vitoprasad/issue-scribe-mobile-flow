@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -152,7 +151,7 @@ const mockApprovalRequests = [
             id: 'resp-1',
             timestamp: '2025-04-24T10:20:00',
             user: 'Sarah Adams',
-            message: 'I've contacted the supplier. They can deliver by EOD tomorrow with express shipping.'
+            message: "I've contacted the supplier. They can deliver by EOD tomorrow with express shipping."
           }
         ]
       }
