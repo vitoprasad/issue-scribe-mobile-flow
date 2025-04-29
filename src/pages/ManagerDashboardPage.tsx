@@ -27,7 +27,7 @@ const ManagerDashboardPage = () => {
   const [activeView, setActiveView] = useState<'dashboard' | 'approvals' | 'cost-risk'>('dashboard');
   
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col min-h-screen">
       <MainNavigation />
       <div className="mb-4 px-6 pt-4">
         <Tabs 
@@ -43,7 +43,7 @@ const ManagerDashboardPage = () => {
         </Tabs>
       </div>
       <SidebarProvider defaultOpen={true}>
-        <div className="flex w-full flex-1 bg-background overflow-hidden">
+        <div className="flex w-full flex-1">
           <DashboardSidebar 
             activeMetric={activeView === 'dashboard' ? 'risk' : activeView === 'approvals' ? 'approvals' : 'cost'} 
             setActiveView={setActiveView}
