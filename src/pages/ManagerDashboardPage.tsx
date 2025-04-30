@@ -51,19 +51,7 @@ const ManagerDashboardPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <MainNavigation />
-      <div className="mb-4 px-6 pt-4">
-        <Tabs 
-          value={activeView} 
-          onValueChange={(value) => setActiveView(value as 'dashboard' | 'approvals' | 'cost-risk')} 
-          className="w-full"
-        >
-          <TabsList className="grid w-[600px] grid-cols-3">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="approvals">Pending Approvals</TabsTrigger>
-            <TabsTrigger value="cost-risk">Cost Risk Analysis</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      
       <SidebarProvider defaultOpen={true}>
         <div className="flex w-full flex-1">
           <DashboardSidebar 
@@ -74,8 +62,19 @@ const ManagerDashboardPage = () => {
             onResetFilters={handleResetFilters}
           />
           
-          {/* Use TabsContent components here for proper rendering */}
-          <Tabs value={activeView} className="flex-1">
+          <Tabs 
+            value={activeView} 
+            onValueChange={(value) => setActiveView(value as 'dashboard' | 'approvals' | 'cost-risk')} 
+            className="flex-1"
+          >
+            <div className="mb-4 px-6 pt-4">
+              <TabsList className="grid w-[600px] grid-cols-3">
+                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                <TabsTrigger value="approvals">Pending Approvals</TabsTrigger>
+                <TabsTrigger value="cost-risk">Cost Risk Analysis</TabsTrigger>
+              </TabsList>
+            </div>
+            
             <TabsContent value="dashboard" className="flex-1 h-full m-0">
               <DashboardContent />
             </TabsContent>

@@ -99,65 +99,104 @@ const IssueTicketsPage = () => {
             {/* Move the header outside the tabs to prevent shifting */}
             <IssueTicketsHeader />
             
-            <div className="mb-4 px-6 pt-4">
-              <Tabs 
-                value={activeView} 
-                onValueChange={(value) => setActiveView(value as 'all-tickets' | 'open' | 'in-progress' | 'pending')} 
-                className="w-full"
-              >
+            <Tabs 
+              value={activeView} 
+              onValueChange={(value) => setActiveView(value as 'all-tickets' | 'open' | 'in-progress' | 'pending')} 
+              className="flex-1 flex flex-col"
+            >
+              <div className="px-6 pt-4">
                 <TabsList className="grid w-full max-w-[600px] grid-cols-4">
                   <TabsTrigger value="all-tickets">All Tickets</TabsTrigger>
                   <TabsTrigger value="open">Open</TabsTrigger>
                   <TabsTrigger value="in-progress">In Progress</TabsTrigger>
                   <TabsTrigger value="pending">Pending Review</TabsTrigger>
                 </TabsList>
-              </Tabs>
-            </div>
-            
-            {/* Use a single Tabs component to avoid nesting */}
-            <TabsContent value={activeView} className="m-0 flex-1 p-6">
-              <div className="flex flex-1">
-                <div className={`flex-1 ${showDetailPane ? 'lg:pr-0' : ''}`}>
-                  {activeView === 'all-tickets' && (
+              </div>
+              
+              <TabsContent value="all-tickets" className="m-0 flex-1 p-6">
+                <div className="flex flex-1">
+                  <div className={`flex-1 ${showDetailPane ? 'lg:pr-0' : ''}`}>
                     <IssueTicketsTable 
                       onTicketClick={handleTicketClick} 
                       filters={filters}
                       statusFilter={null}
                     />
+                  </div>
+                  {showDetailPane && selectedTicket && (
+                    <div className="w-96 border-l bg-slate-50 overflow-auto">
+                      <IssueDetailPane 
+                        ticket={selectedTicket} 
+                        onClose={handleCloseDetailPane} 
+                        onAction={handleTicketAction}
+                      />
+                    </div>
                   )}
-                  {activeView === 'open' && (
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="open" className="m-0 flex-1 p-6">
+                <div className="flex flex-1">
+                  <div className={`flex-1 ${showDetailPane ? 'lg:pr-0' : ''}`}>
                     <IssueTicketsTable 
                       onTicketClick={handleTicketClick} 
                       filters={filters}
                       statusFilter="Open"
                     />
+                  </div>
+                  {showDetailPane && selectedTicket && (
+                    <div className="w-96 border-l bg-slate-50 overflow-auto">
+                      <IssueDetailPane 
+                        ticket={selectedTicket} 
+                        onClose={handleCloseDetailPane} 
+                        onAction={handleTicketAction}
+                      />
+                    </div>
                   )}
-                  {activeView === 'in-progress' && (
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="in-progress" className="m-0 flex-1 p-6">
+                <div className="flex flex-1">
+                  <div className={`flex-1 ${showDetailPane ? 'lg:pr-0' : ''}`}>
                     <IssueTicketsTable 
                       onTicketClick={handleTicketClick} 
                       filters={filters}
                       statusFilter="In Progress"
                     />
+                  </div>
+                  {showDetailPane && selectedTicket && (
+                    <div className="w-96 border-l bg-slate-50 overflow-auto">
+                      <IssueDetailPane 
+                        ticket={selectedTicket} 
+                        onClose={handleCloseDetailPane} 
+                        onAction={handleTicketAction}
+                      />
+                    </div>
                   )}
-                  {activeView === 'pending' && (
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="pending" className="m-0 flex-1 p-6">
+                <div className="flex flex-1">
+                  <div className={`flex-1 ${showDetailPane ? 'lg:pr-0' : ''}`}>
                     <IssueTicketsTable 
                       onTicketClick={handleTicketClick} 
                       filters={filters}
                       statusFilter="Pending Review"
                     />
+                  </div>
+                  {showDetailPane && selectedTicket && (
+                    <div className="w-96 border-l bg-slate-50 overflow-auto">
+                      <IssueDetailPane 
+                        ticket={selectedTicket} 
+                        onClose={handleCloseDetailPane} 
+                        onAction={handleTicketAction}
+                      />
+                    </div>
                   )}
                 </div>
-                {showDetailPane && selectedTicket && (
-                  <div className="w-96 border-l bg-slate-50 overflow-auto">
-                    <IssueDetailPane 
-                      ticket={selectedTicket} 
-                      onClose={handleCloseDetailPane} 
-                      onAction={handleTicketAction}
-                    />
-                  </div>
-                )}
-              </div>
-            </TabsContent>
+              </TabsContent>
+            </Tabs>
           </SidebarInset>
         </div>
       </SidebarProvider>
