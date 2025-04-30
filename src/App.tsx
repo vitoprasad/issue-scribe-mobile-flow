@@ -11,6 +11,7 @@ import ManagerDashboardPage from "./pages/ManagerDashboardPage";
 import IssueTicketsPage from "./pages/IssueTicketsPage";
 import ExecutiveDashboardPage from "./pages/ExecutiveDashboardPage";
 import SplashPage from "./pages/SplashPage";
+import QuickNavToggle from "./components/QuickNavToggle";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <QuickNavToggle />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
