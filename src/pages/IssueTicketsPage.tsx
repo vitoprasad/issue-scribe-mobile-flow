@@ -7,13 +7,23 @@ import {
   SidebarHeader,
   SidebarGroup,
   SidebarGroupLabel,
-  SidebarGroupContent
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarSeparator,
+  SidebarFooter,
+  SidebarInset
 } from '@/components/ui/sidebar';
 import { IssueTicketsHeader } from '@/components/IssueTicketsHeader';
 import { IssueTicketsTable } from '@/components/IssueTicketsTable';
 import { IssueDetailPane } from '@/components/IssueDetailPane';
 import { IssueTicketsFilters } from '@/components/IssueTicketsFilters';
 import { useToast } from "@/hooks/use-toast";
+import MainNavigation from '@/components/MainNavigation';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Filter, Clipboard, Clock, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export interface FilterState {
   categories: string[];
@@ -27,6 +37,7 @@ export interface FilterState {
 const IssueTicketsPage = () => {
   const [selectedTicket, setSelectedTicket] = useState<IssueTicket | null>(null);
   const [showDetailPane, setShowDetailPane] = useState(false);
+  const [activeView, setActiveView] = useState<'all-tickets' | 'open' | 'in-progress' | 'pending'>('all-tickets');
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     minCost: null,
@@ -73,35 +84,86 @@ const IssueTicketsPage = () => {
   };
   
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="flex w-full min-h-screen bg-background">
-        <IssueTicketsSidebar 
-          filters={filters} 
-          onFilterChange={handleFilterChange} 
-          onClearFilters={handleClearFilters} 
-        />
-        <div className="flex-1 flex flex-col">
-          <IssueTicketsHeader />
-          <div className="flex flex-1">
-            <div className={`flex-1 p-6 ${showDetailPane ? 'lg:pr-0' : ''}`}>
-              <IssueTicketsTable 
-                onTicketClick={handleTicketClick} 
-                filters={filters} 
-              />
-            </div>
-            {showDetailPane && selectedTicket && (
-              <div className="w-96 border-l bg-slate-50 overflow-auto">
-                <IssueDetailPane 
-                  ticket={selectedTicket} 
-                  onClose={handleCloseDetailPane} 
-                  onAction={handleTicketAction}
-                />
-              </div>
-            )}
-          </div>
-        </div>
+    <div className="flex flex-col min-h-screen">
+      <MainNavigation />
+      
+      <div className="mb-4 px-6 pt-4">
+        <Tabs 
+          value={activeView} 
+          onValueChange={(value) => setActiveView(value as 'all-tickets' | 'open' | 'in-progress' | 'pending')} 
+          className="w-full"
+        >
+          <TabsList className="grid w-[600px] grid-cols-4">
+            <TabsTrigger value="all-tickets">All Tickets</TabsTrigger>
+            <TabsTrigger value="open">Open</TabsTrigger>
+            <TabsTrigger value="in-progress">In Progress</TabsTrigger>
+            <TabsTrigger value="pending">Pending Review</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
-    </SidebarProvider>
+      
+      <SidebarProvider defaultOpen={true}>
+        <div className="flex w-full min-h-screen bg-background flex-1">
+          <IssueTicketsSidebar 
+            filters={filters} 
+            onFilterChange={handleFilterChange} 
+            onClearFilters={handleClearFilters} 
+          />
+          
+          <SidebarInset className="flex-1 p-0">
+            <Tabs value={activeView} className="flex-1 h-full">
+              <TabsContent value="all-tickets" className="m-0 flex-1 flex flex-col">
+                <IssueTicketsHeader />
+                <div className="flex flex-1 p-6">
+                  <div className={`flex-1 ${showDetailPane ? 'lg:pr-0' : ''}`}>
+                    <IssueTicketsTable 
+                      onTicketClick={handleTicketClick} 
+                      filters={filters} 
+                    />
+                  </div>
+                  {showDetailPane && selectedTicket && (
+                    <div className="w-96 border-l bg-slate-50 overflow-auto">
+                      <IssueDetailPane 
+                        ticket={selectedTicket} 
+                        onClose={handleCloseDetailPane} 
+                        onAction={handleTicketAction}
+                      />
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="open" className="m-0 flex-1 flex flex-col">
+                <IssueTicketsHeader />
+                <div className="p-6">
+                  <div className="text-center text-gray-500 p-8">
+                    Open tickets view coming soon
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="in-progress" className="m-0 flex-1 flex flex-col">
+                <IssueTicketsHeader />
+                <div className="p-6">
+                  <div className="text-center text-gray-500 p-8">
+                    In Progress tickets view coming soon
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="pending" className="m-0 flex-1 flex flex-col">
+                <IssueTicketsHeader />
+                <div className="p-6">
+                  <div className="text-center text-gray-500 p-8">
+                    Pending Review tickets view coming soon
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </div>
   );
 };
 
@@ -120,17 +182,70 @@ const IssueTicketsSidebar = ({
         <div className="flex items-center justify-center h-12">
           <h2 className="text-xl font-bold text-sidebar-foreground">Issue Scribe</h2>
         </div>
+        <SidebarSeparator />
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="pb-4">
+        {/* Dashboard Navigation Group */}
         <SidebarGroup>
-          <SidebarGroupLabel>Filters</SidebarGroupLabel>
+          <SidebarGroupLabel>Ticket Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  tooltip="All Tickets" 
+                  isActive={true}
+                >
+                  <Clipboard />
+                  <span>All Tickets</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  tooltip="Priority Items" 
+                >
+                  <AlertTriangle />
+                  <span>Priority Items</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  tooltip="Pending Review" 
+                >
+                  <Clock />
+                  <span>Pending Review</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        {/* Visual separator between Navigation and Filters */}
+        <SidebarSeparator className="my-3" />
+        
+        {/* Ticket Filters Group */}
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <div className="flex items-center">
+              <Filter className="w-4 h-4 mr-2" />
+              Ticket Filters
+            </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent className="px-2">
             <IssueTicketsFilters 
-              filters={filters} 
+              filters={filters}
               onFilterChange={onFilterChange}
-              onClearFilters={onClearFilters}
             />
+            <div className="mt-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-xs"
+                onClick={onClearFilters}
+              >
+                Reset Filters
+              </Button>
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

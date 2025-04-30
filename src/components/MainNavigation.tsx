@@ -98,12 +98,10 @@ const MainNavigation = () => {
           </div>
           
           <div className="md:hidden">
-            <Link to="/splash">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <LayoutDashboard className="h-4 w-4" />
-                <span>Menu</span>
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              <span>Menu</span>
+            </Button>
           </div>
         </div>
       </div>
