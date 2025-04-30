@@ -51,6 +51,7 @@ const MainNavigation = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+  const isHomePage = location.pathname === "/";
 
   return (
     <div className="bg-white border-b border-gray-200">
@@ -58,7 +59,7 @@ const MainNavigation = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex">
             <Link to="/splash" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-industrial-700">Quality Manager</span>
+              {!isHomePage && <span className="text-xl font-bold text-industrial-700">Quality Manager</span>}
             </Link>
           </div>
           
