@@ -140,7 +140,7 @@ const DashboardSidebar = ({
     <Sidebar side="left" variant="inset" collapsible="icon">
       <SidebarHeader className="flex flex-col gap-4 px-2 py-4">
         <div className="flex items-center justify-center h-12">
-          <h2 className="text-xl font-bold text-sidebar-foreground">Issue Scribe</h2>
+          {/* Removed "Issue Scribe" text here */}
         </div>
         <SidebarSeparator className="mt-2" />
       </SidebarHeader>
