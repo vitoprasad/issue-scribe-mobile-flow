@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FileText, Clipboard, LayoutDashboard, BarChart3, Package } from 'lucide-react';
@@ -57,7 +58,7 @@ const MainNavigation = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex">
             <Link to="/splash" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-industrial-700">Issue Scribe</span>
+              <span className="text-xl font-bold text-industrial-700">Quality Manager</span>
             </Link>
           </div>
           
