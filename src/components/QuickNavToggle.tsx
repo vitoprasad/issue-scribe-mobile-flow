@@ -15,9 +15,15 @@ export const QuickNavToggle = () => {
 
   const menuItems = [
     {
+      title: "Home",
+      icon: <Menu className="h-4 w-4" />,
+      path: "/",
+      description: "Main menu"
+    },
+    {
       title: "Issue Scribe",
       icon: <FileText className="h-4 w-4" />,
-      path: "/",
+      path: "/issue-scribe",
       description: "Report quality issues"
     },
     {
@@ -43,12 +49,6 @@ export const QuickNavToggle = () => {
       icon: <Package className="h-4 w-4" />,
       path: "/executive-dashboard",
       description: "Program overview"
-    },
-    {
-      title: "Splash Page",
-      icon: <Menu className="h-4 w-4" />,
-      path: "/splash",
-      description: "Main menu"
     }
   ];
 

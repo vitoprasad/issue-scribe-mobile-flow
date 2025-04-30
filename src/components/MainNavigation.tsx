@@ -21,7 +21,7 @@ const MainNavigation = () => {
     {
       title: "Issue Scribe",
       icon: <FileText className="h-4 w-4" />,
-      path: "/",
+      path: "/issue-scribe",
       description: "Report quality issues with detailed information"
     },
     {
@@ -51,15 +51,16 @@ const MainNavigation = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
-  const isHomePage = location.pathname === "/";
+  const isHomePage = location.pathname === "/issue-scribe";
+  const isSplashPage = location.pathname === "/";
 
   return (
     <div className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center h-16">
           <div className="flex">
-            <Link to="/splash" className="flex-shrink-0 flex items-center">
-              {!isHomePage && <span className="text-xl font-bold text-industrial-700">Quality Manager</span>}
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              {!isHomePage && !isSplashPage && <span className="text-xl font-bold text-industrial-700">Quality Manager</span>}
             </Link>
           </div>
           
