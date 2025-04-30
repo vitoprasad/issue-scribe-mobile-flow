@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Sidebar, 
@@ -179,10 +178,7 @@ const IssueTicketsSidebar = ({
   return (
     <Sidebar side="left" variant="inset" collapsible="icon">
       <SidebarHeader className="flex flex-col gap-4 px-2 py-4">
-        <div className="flex items-center justify-center h-12">
-          <h2 className="text-xl font-bold text-sidebar-foreground">Issue Scribe</h2>
-        </div>
-        <SidebarSeparator />
+        <SidebarSeparator className="mt-2" />
       </SidebarHeader>
       
       <SidebarContent className="pb-4">
