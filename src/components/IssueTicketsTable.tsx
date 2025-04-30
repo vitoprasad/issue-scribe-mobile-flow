@@ -23,10 +23,12 @@ type SortDirection = 'asc' | 'desc';
 
 export const IssueTicketsTable = ({ 
   onTicketClick,
-  filters
+  filters,
+  statusFilter
 }: { 
   onTicketClick: (ticket: IssueTicket) => void,
-  filters: FilterState
+  filters: FilterState,
+  statusFilter: 'Open' | 'In Progress' | 'Pending Review' | 'Closed' | null
 }) => {
   const [sortField, setSortField] = useState<SortField>('timeReported');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -56,9 +58,14 @@ export const IssueTicketsTable = ({
     }
   };
   
-  // Filter the data based on applied filters
+  // Filter the data based on applied filters and status filter
   const filteredTickets = useMemo(() => {
     return mockIssueTickets.filter(ticket => {
+      // Apply status filter if specified
+      if (statusFilter && ticket.status !== statusFilter) {
+        return false;
+      }
+      
       // Category filter
       if (filters.categories.length > 0 && !filters.categories.includes(ticket.category)) {
         return false;
@@ -88,7 +95,7 @@ export const IssueTicketsTable = ({
       
       return true;
     });
-  }, [filters]);
+  }, [filters, statusFilter]);
   
   // Sort the filtered data
   const sortedTickets = useMemo(() => {
@@ -114,11 +121,17 @@ export const IssueTicketsTable = ({
     });
   }, [filteredTickets, sortField, sortDirection]);
 
+  // Create a title based on the status filter
+  const tableTitle = useMemo(() => {
+    if (!statusFilter) return "All Tickets";
+    return `${statusFilter} Tickets`;
+  }, [statusFilter]);
+
   return (
     <div className="rounded-md border bg-white shadow-sm">
       <div className="p-4 flex justify-between items-center">
         <h2 className="text-lg font-medium">
-          Open Tickets ({sortedTickets.length})
+          {tableTitle} ({sortedTickets.length})
           {filters.categories.length > 0 || 
            filters.severityLevels.length > 0 || 
            filters.minCost !== null || 

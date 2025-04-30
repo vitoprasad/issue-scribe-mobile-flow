@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Sidebar, 
@@ -95,6 +96,9 @@ const IssueTicketsPage = () => {
           />
           
           <SidebarInset className="flex-1 p-0 flex flex-col">
+            {/* Move the header outside the tabs to prevent shifting */}
+            <IssueTicketsHeader />
+            
             <div className="mb-4 px-6 pt-4">
               <Tabs 
                 value={activeView} 
@@ -110,55 +114,50 @@ const IssueTicketsPage = () => {
               </Tabs>
             </div>
             
-            <Tabs value={activeView} className="flex-1 flex flex-col">
-              <TabsContent value="all-tickets" className="m-0 flex-1 flex flex-col">
-                <IssueTicketsHeader />
-                <div className="flex flex-1 p-6">
-                  <div className={`flex-1 ${showDetailPane ? 'lg:pr-0' : ''}`}>
+            {/* Use a single Tabs component to avoid nesting */}
+            <TabsContent value={activeView} className="m-0 flex-1 p-6">
+              <div className="flex flex-1">
+                <div className={`flex-1 ${showDetailPane ? 'lg:pr-0' : ''}`}>
+                  {activeView === 'all-tickets' && (
                     <IssueTicketsTable 
                       onTicketClick={handleTicketClick} 
-                      filters={filters} 
+                      filters={filters}
+                      statusFilter={null}
                     />
-                  </div>
-                  {showDetailPane && selectedTicket && (
-                    <div className="w-96 border-l bg-slate-50 overflow-auto">
-                      <IssueDetailPane 
-                        ticket={selectedTicket} 
-                        onClose={handleCloseDetailPane} 
-                        onAction={handleTicketAction}
-                      />
-                    </div>
+                  )}
+                  {activeView === 'open' && (
+                    <IssueTicketsTable 
+                      onTicketClick={handleTicketClick} 
+                      filters={filters}
+                      statusFilter="Open"
+                    />
+                  )}
+                  {activeView === 'in-progress' && (
+                    <IssueTicketsTable 
+                      onTicketClick={handleTicketClick} 
+                      filters={filters}
+                      statusFilter="In Progress"
+                    />
+                  )}
+                  {activeView === 'pending' && (
+                    <IssueTicketsTable 
+                      onTicketClick={handleTicketClick} 
+                      filters={filters}
+                      statusFilter="Pending Review"
+                    />
                   )}
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="open" className="m-0 flex-1 flex flex-col">
-                <IssueTicketsHeader />
-                <div className="p-6">
-                  <div className="text-center text-gray-500 p-8">
-                    Open tickets view coming soon
+                {showDetailPane && selectedTicket && (
+                  <div className="w-96 border-l bg-slate-50 overflow-auto">
+                    <IssueDetailPane 
+                      ticket={selectedTicket} 
+                      onClose={handleCloseDetailPane} 
+                      onAction={handleTicketAction}
+                    />
                   </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="in-progress" className="m-0 flex-1 flex flex-col">
-                <IssueTicketsHeader />
-                <div className="p-6">
-                  <div className="text-center text-gray-500 p-8">
-                    In Progress tickets view coming soon
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="pending" className="m-0 flex-1 flex flex-col">
-                <IssueTicketsHeader />
-                <div className="p-6">
-                  <div className="text-center text-gray-500 p-8">
-                    Pending Review tickets view coming soon
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
+                )}
+              </div>
+            </TabsContent>
           </SidebarInset>
         </div>
       </SidebarProvider>
@@ -178,6 +177,9 @@ const IssueTicketsSidebar = ({
   return (
     <Sidebar side="left" variant="inset" collapsible="icon">
       <SidebarHeader className="flex flex-col gap-4 px-2 py-4">
+        <div className="flex items-center justify-center h-12">
+          <h2 className="text-xl font-bold text-sidebar-foreground">Issue Scribe</h2>
+        </div>
         <SidebarSeparator className="mt-2" />
       </SidebarHeader>
       
