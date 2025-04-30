@@ -87,21 +87,6 @@ const IssueTicketsPage = () => {
     <div className="flex flex-col min-h-screen">
       <MainNavigation />
       
-      <div className="mb-4 px-6 pt-4">
-        <Tabs 
-          value={activeView} 
-          onValueChange={(value) => setActiveView(value as 'all-tickets' | 'open' | 'in-progress' | 'pending')} 
-          className="w-full"
-        >
-          <TabsList className="grid w-[600px] grid-cols-4">
-            <TabsTrigger value="all-tickets">All Tickets</TabsTrigger>
-            <TabsTrigger value="open">Open</TabsTrigger>
-            <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-            <TabsTrigger value="pending">Pending Review</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-      
       <SidebarProvider defaultOpen={true}>
         <div className="flex w-full min-h-screen bg-background flex-1">
           <IssueTicketsSidebar 
@@ -110,8 +95,23 @@ const IssueTicketsPage = () => {
             onClearFilters={handleClearFilters} 
           />
           
-          <SidebarInset className="flex-1 p-0">
-            <Tabs value={activeView} className="flex-1 h-full">
+          <SidebarInset className="flex-1 p-0 flex flex-col">
+            <div className="mb-4 px-6 pt-4">
+              <Tabs 
+                value={activeView} 
+                onValueChange={(value) => setActiveView(value as 'all-tickets' | 'open' | 'in-progress' | 'pending')} 
+                className="w-full"
+              >
+                <TabsList className="grid w-full max-w-[600px] grid-cols-4">
+                  <TabsTrigger value="all-tickets">All Tickets</TabsTrigger>
+                  <TabsTrigger value="open">Open</TabsTrigger>
+                  <TabsTrigger value="in-progress">In Progress</TabsTrigger>
+                  <TabsTrigger value="pending">Pending Review</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            
+            <Tabs value={activeView} className="flex-1 flex flex-col">
               <TabsContent value="all-tickets" className="m-0 flex-1 flex flex-col">
                 <IssueTicketsHeader />
                 <div className="flex flex-1 p-6">
