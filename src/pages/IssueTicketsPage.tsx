@@ -235,6 +235,7 @@ const IssueTicketsSidebar = ({
             <IssueTicketsFilters 
               filters={filters}
               onFilterChange={onFilterChange}
+              onClearFilters={onClearFilters}
             />
             <div className="mt-3">
               <Button 
