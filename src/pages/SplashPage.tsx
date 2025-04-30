@@ -11,7 +11,7 @@ const SplashPage = () => {
     {
       title: "Issue Scribe",
       icon: <FileText className="h-6 w-6" />,
-      path: "/",
+      path: "/issue-scribe",
       description: "Report quality issues with detailed information",
       color: "bg-blue-50 text-blue-600"
     },
